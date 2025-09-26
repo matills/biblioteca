@@ -1,0 +1,289 @@
+@model IEnumerable<Biblioteca.Models.Libro>
+
+@{
+    ViewData["Title"] = "Gestión de Libros";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary"><i class="fas fa-book-open"></i> @ViewData["Title"]</h2>
+                <div class="btn-group">
+                    <a asp-action="Create" class="btn btn-success btn-lg me-2">
+                        <i class="fas fa-plus"></i> Nuevo Libro
+                    </a>
+                    <button type="button" class="btn btn-info btn-lg" data-bs-toggle="modal" data-bs-target="#importarExcelModal">
+                        <i class="fas fa-file-excel"></i> Importar Excel
+                    </button>
+                </div>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Warning"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> @TempData["Warning"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" id="filtroTitulo" class="form-control" placeholder="Buscar por título...">
+                        </div>
+                        <div class="col-md-3">
+                            <select id="filtroCategoria" class="form-select">
+                                <option value="">Todas las categorías</option>
+                                @foreach (var categoria in ViewBag.Categorias ?? new List<object>())
+                                {
+                                    <option value="@categoria.ToString()">@categoria.ToString()</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="filtroDisponibilidad" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="disponible">Disponibles</option>
+                                <option value="nodisponible">No disponibles</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped" id="tablaLibros">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Imagen</th>
+                                    <th>@Html.DisplayNameFor(model => model.Titulo)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Autor)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Categoria)</th>
+                                    <th>@Html.DisplayNameFor(model => model.AnoPublicacion)</th>
+                                    <th>@Html.DisplayNameFor(model => model.CantidadDisponible)</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(item.ImagenPortada))
+                                            {
+                                                <img src="@item.ImagenPortada" alt="Portada" class="img-thumbnail libro-imagen" 
+                                                     style="width: 50px; height: 60px; object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                     style="width: 50px; height: 60px; border-radius: 5px;">
+                                                    <i class="fas fa-book text-muted"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td class="fw-bold">@Html.DisplayFor(modelItem => item.Titulo)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Autor.Nombre)</td>
+                                        <td>
+                                            <span class="badge bg-info">@Html.DisplayFor(modelItem => item.Categoria.Nombre)</span>
+                                        </td>
+                                        <td>@Html.DisplayFor(modelItem => item.AnoPublicacion)</td>
+                                        <td>
+                                            @if (item.CantidadDisponible > 0)
+                                            {
+                                                <span class="badge bg-success">@item.CantidadDisponible disponibles</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">No disponible</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Details" asp-route-id="@item.LibroId" 
+                                                   class="btn btn-info btn-sm" title="Ver Detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@item.LibroId" 
+                                                   class="btn btn-warning btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a asp-action="Delete" asp-route-id="@item.LibroId" 
+                                                   class="btn btn-danger btn-sm" title="Eliminar">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="importarExcelModal" tabindex="-1" aria-labelledby="importarExcelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="ImportarExcel" method="post" enctype="multipart/form-data">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="importarExcelModalLabel">
+                        <i class="fas fa-file-excel"></i> Importar Libros desde Excel
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="excelFile" class="form-label fw-bold">Seleccionar archivo Excel:</label>
+                        <input type="file" class="form-control" id="excelFile" name="excelFile" 
+                               accept=".xlsx,.xls" required>
+                        <div class="form-text">
+                            El archivo debe contener las columnas: Título, ISBN, Autor, Categoría, Año, Páginas, Cantidad, Descripción
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle"></i> Formato esperado:</h6>
+                        <ul class="mb-0 small">
+                            <li><strong>Columna A:</strong> Título (obligatorio)</li>
+                            <li><strong>Columna B:</strong> ISBN (obligatorio)</li>
+                            <li><strong>Columna C:</strong> Nombre del Autor</li>
+                            <li><strong>Columna D:</strong> Nombre de la Categoría</li>
+                            <li><strong>Columna E:</strong> Año de Publicación</li>
+                            <li><strong>Columna F:</strong> Número de Páginas</li>
+                            <li><strong>Columna G:</strong> Cantidad Disponible</li>
+                            <li><strong>Columna H:</strong> Descripción</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-upload"></i> Importar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+    }
+    
+    .btn-info {
+        background: linear-gradient(45deg, #17a2b8, #007bff);
+        border: none;
+    }
+    
+    .btn-success:hover, .btn-info:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .table th {
+        background: linear-gradient(45deg, #343a40, #495057) !important;
+        border: none;
+    }
+    
+    .libro-imagen {
+        transition: transform 0.3s ease;
+    }
+    
+    .libro-imagen:hover {
+        transform: scale(1.1);
+    }
+    
+    .btn-group .btn {
+        margin: 0 1px;
+    }
+    
+    .modal-content {
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.getElementById('filtroTitulo').addEventListener('keyup', filtrarTabla);
+        document.getElementById('filtroCategoria').addEventListener('change', filtrarTabla);
+        document.getElementById('filtroDisponibilidad').addEventListener('change', filtrarTabla);
+
+        function filtrarTabla() {
+            const filtroTitulo = document.getElementById('filtroTitulo').value.toLowerCase();
+            const filtroCategoria = document.getElementById('filtroCategoria').value.toLowerCase();
+            const filtroDisponibilidad = document.getElementById('filtroDisponibilidad').value;
+            
+            const filas = document.querySelectorAll('#tablaLibros tbody tr');
+            
+            filas.forEach(fila => {
+                const titulo = fila.cells[1].textContent.toLowerCase();
+                const categoria = fila.cells[3].textContent.toLowerCase();
+                const disponibilidad = fila.cells[5].textContent.toLowerCase();
+                
+                let mostrar = true;
+                
+                if (filtroTitulo && !titulo.includes(filtroTitulo)) {
+                    mostrar = false;
+                }
+                
+                if (filtroCategoria && !categoria.includes(filtroCategoria)) {
+                    mostrar = false;
+                }
+                
+                if (filtroDisponibilidad === 'disponible' && disponibilidad.includes('no disponible')) {
+                    mostrar = false;
+                }
+                
+                if (filtroDisponibilidad === 'nodisponible' && !disponibilidad.includes('no disponible')) {
+                    mostrar = false;
+                }
+                
+                fila.style.display = mostrar ? '' : 'none';
+            });
+        }
+        
+        function limpiarFiltros() {
+            document.getElementById('filtroTitulo').value = '';
+            document.getElementById('filtroCategoria').value = '';
+            document.getElementById('filtroDisponibilidad').value = '';
+            filtrarTabla();
+        }
+    </script>
+}

@@ -1,0 +1,125 @@
+@model IEnumerable<Biblioteca.Models.Autor>
+
+  @{
+      ViewData["Title"] = "Gestión de Autores";
+  }
+  
+  <div class="container mt-4">
+      <div class="row">
+          <div class="col-md-12">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                  <h2 class="text-primary"><i class="fas fa-user-edit"></i> @ViewData["Title"]</h2>
+                  <a asp-action="Create" class="btn btn-success btn-lg">
+                      <i class="fas fa-plus"></i> Nuevo Autor
+                  </a>
+              </div>
+  
+              @if (TempData["Success"] != null)
+              {
+                  <div class="alert alert-success alert-dismissible fade show" role="alert">
+                      <i class="fas fa-check-circle"></i> @TempData["Success"]
+                      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+              }
+  
+              @if (TempData["Error"] != null)
+              {
+                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                      <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+              }
+  
+              <div class="card shadow">
+                  <div class="card-body">
+                      <div class="table-responsive">
+                          <table class="table table-hover table-striped">
+                              <thead class="table-dark">
+                                  <tr>
+                                      <th>@Html.DisplayNameFor(model => model.Nombre)</th>
+                                      <th>@Html.DisplayNameFor(model => model.FechaNacimiento)</th>
+                                      <th>@Html.DisplayNameFor(model => model.Pais)</th>
+                                      <th>Cantidad de Libros</th>
+                                      <th class="text-center">Acciones</th>
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  @foreach (var item in Model)
+                                  {
+                                      <tr>
+                                          <td class="fw-bold">@Html.DisplayFor(modelItem => item.Nombre)</td>
+                                          <td>
+                                              @if (item.FechaNacimiento.HasValue)
+                                              {
+                                                  @item.FechaNacimiento.Value.ToString("dd/MM/yyyy")
+                                              }
+                                              else
+                                              {
+                                                  <span class="text-muted">No especificada</span>
+                                              }
+                                          </td>
+                                          <td>
+                                              @if (!string.IsNullOrEmpty(item.Pais))
+                                              {
+                                                  @item.Pais
+                                              }
+                                              else
+                                              {
+                                                  <span class="text-muted">No especificado</span>
+                                              }
+                                          </td>
+                                          <td>
+                                              <span class="badge bg-info">@item.Libros.Count</span>
+                                          </td>
+                                          <td class="text-center">
+                                              <div class="btn-group" role="group">
+                                                  <a asp-action="Details" asp-route-id="@item.AutorId" 
+                                                     class="btn btn-info btn-sm" title="Ver Detalles">
+                                                      <i class="fas fa-eye"></i>
+                                                  </a>
+                                                  <a asp-action="Edit" asp-route-id="@item.AutorId" 
+                                                     class="btn btn-warning btn-sm" title="Editar">
+                                                      <i class="fas fa-edit"></i>
+                                                  </a>
+                                                  <a asp-action="Delete" asp-route-id="@item.AutorId" 
+                                                     class="btn btn-danger btn-sm" title="Eliminar">
+                                                      <i class="fas fa-trash"></i>
+                                                  </a>
+                                              </div>
+                                          </td>
+                                      </tr>
+                                  }
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  
+  <style>
+      .btn-success {
+          background: linear-gradient(45deg, #28a745, #20c997);
+          border: none;
+      }
+      
+      .btn-success:hover {
+          background: linear-gradient(45deg, #1e7e34, #17a2b8);
+          transform: translateY(-1px);
+      }
+      
+      .card {
+          border: none;
+          border-radius: 15px;
+      }
+      
+      .table th {
+          background: linear-gradient(45deg, #343a40, #495057) !important;
+          border: none;
+      }
+      
+      .btn-group .btn {
+          margin: 0 1px;
+      }
+  </style>

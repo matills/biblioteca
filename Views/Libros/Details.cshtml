@@ -1,0 +1,328 @@
+@model Biblioteca.Models.Libro
+
+@{
+    ViewData["Title"] = "Detalles del Libro";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary"><i class="fas fa-book-open"></i> @ViewData["Title"]</h2>
+                <div class="btn-group">
+                    <a asp-action="Edit" asp-route-id="@Model?.LibroId" class="btn btn-warning btn-lg">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            @if (!string.IsNullOrEmpty(Model.ImagenPortada))
+                            {
+                                <img src="@Model.ImagenPortada" alt="Portada de @Model.Titulo" 
+                                     class="img-fluid rounded shadow-sm libro-portada"
+                                     style="width: 100%; max-width: 250px; cursor: pointer;"
+                                     data-bs-toggle="modal" data-bs-target="#imagenModal">
+                            }
+                            else
+                            {
+                                <div class="bg-light d-flex align-items-center justify-content-center rounded" 
+                                     style="width: 100%; height: 300px; max-width: 250px;">
+                                    <i class="fas fa-book fa-4x text-muted"></i>
+                                </div>
+                            }
+                            
+                            <!-- Estado de disponibilidad -->
+                            <div class="mt-3">
+                                @if (Model.CantidadDisponible > 0)
+                                {
+                                    <div class="alert alert-success text-center">
+                                        <i class="fas fa-check-circle"></i>
+                                        <strong>@Model.CantidadDisponible</strong> copias disponibles
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-danger text-center">
+                                        <i class="fas fa-times-circle"></i>
+                                        <strong>No disponible</strong>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-9">
+                            <h3 class="text-primary mb-3">@Html.DisplayFor(model => model.Titulo)</h3>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <td class="fw-bold text-muted"><i class="fas fa-barcode"></i> ISBN:</td>
+                                                <td>@Html.DisplayFor(model => model.ISBN)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-muted"><i class="fas fa-user-edit"></i> Autor:</td>
+                                                <td>
+                                                    <a asp-controller="Autores" asp-action="Details" asp-route-id="@Model.Autor?.AutorId" 
+                                                       class="text-decoration-none">
+                                                        @Html.DisplayFor(model => model.Autor.Nombre)
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-muted"><i class="fas fa-tags"></i> Categoría:</td>
+                                                <td>
+                                                    <span class="badge bg-info fs-6">
+                                                        @Html.DisplayFor(model => model.Categoria.Nombre)
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tbody>
+                                            <tr>
+                                                <td class="fw-bold text-muted"><i class="fas fa-calendar"></i> Año:</td>
+                                                <td>@Html.DisplayFor(model => model.AnoPublicacion)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-muted"><i class="fas fa-file-alt"></i> Páginas:</td>
+                                                <td>@Html.DisplayFor(model => model.NumeroPaginas)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="fw-bold text-muted"><i class="fas fa-boxes"></i> Stock:</td>
+                                                <td>
+                                                    <span class="badge bg-primary fs-6">
+                                                        @Html.DisplayFor(model => model.CantidadDisponible) unidades
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(Model.Descripcion))
+                            {
+                                <div class="mb-4">
+                                    <h5 class="text-muted mb-3"><i class="fas fa-align-left"></i> Descripción</h5>
+                                    <div class="p-3 bg-light rounded">
+                                        <p class="mb-0">@Html.DisplayFor(model => model.Descripcion)</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Historial de Préstamos</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Prestamos?.Any() == true)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Fecha Préstamo</th>
+                                        <th>Fecha Devolución Esperada</th>
+                                        <th>Fecha Devolución Real</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var prestamo in Model.Prestamos.OrderByDescending(p => p.FechaPrestamo))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Usuarios" asp-action="Details" asp-route-id="@prestamo.Usuario?.UsuarioId"
+                                                   class="text-decoration-none">
+                                                    @prestamo.Usuario?.Nombre
+                                                </a>
+                                            </td>
+                                            <td>@prestamo.FechaPrestamo.ToString("dd/MM/yyyy")</td>
+                                            <td>@prestamo.FechaDevolucionEsperada.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                @if (prestamo.FechaDevolucionReal.HasValue)
+                                                {
+                                                    @prestamo.FechaDevolucionReal.Value.ToString("dd/MM/yyyy")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Pendiente</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @switch (prestamo.Estado)
+                                                {
+                                                    case "Activo":
+                                                        <span class="badge bg-warning">Activo</span>
+                                                        break;
+                                                    case "Devuelto":
+                                                        <span class="badge bg-success">Devuelto</span>
+                                                        break;
+                                                    case "Vencido":
+                                                        <span class="badge bg-danger">Vencido</span>
+                                                        break;
+                                                    default:
+                                                        <span class="badge bg-secondary">@prestamo.Estado</span>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Estadísticas rápidas -->
+                        <div class="row mt-4">
+                            <div class="col-md-3">
+                                <div class="card bg-primary text-white text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-list-ol fa-2x mb-2"></i>
+                                        <h4>@Model.Prestamos.Count()</h4>
+                                        <small>Total Préstamos</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-warning text-white text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-clock fa-2x mb-2"></i>
+                                        <h4>@Model.Prestamos.Count(p => p.Estado == "Activo")</h4>
+                                        <small>Préstamos Activos</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-success text-white text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                        <h4>@Model.Prestamos.Count(p => p.Estado == "Devuelto")</h4>
+                                        <small>Devueltos</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card bg-danger text-white text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                                        <h4>@Model.Prestamos.Count(p => p.Estado == "Vencido")</h4>
+                                        <small>Vencidos</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Este libro aún no ha sido prestado.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.ImagenPortada))
+{
+    <div class="modal fade" id="imagenModal" tabindex="-1" aria-labelledby="imagenModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imagenModalLabel">@Model.Titulo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="@Model.ImagenPortada" alt="Portada de @Model.Titulo" class="img-fluid rounded">
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .libro-portada {
+        transition: transform 0.3s ease;
+        border: 2px solid #e9ecef;
+    }
+    
+    .libro-portada:hover {
+        transform: scale(1.02);
+        border-color: #007bff;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .table td {
+        vertical-align: middle;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
+        border: none;
+    }
+    
+    .btn-warning:hover {
+        background: linear-gradient(45deg, #e0a800, #dc6502);
+        transform: translateY(-1px);
+    }
+    
+    .card-header {
+        background: linear-gradient(45deg, #17a2b8, #007bff) !important;
+        border-radius: 15px 15px 0 0 !important;
+    }
+    
+    .badge {
+        font-size: 0.8rem;
+    }
+    
+    .modal-content {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .bg-primary {
+        background: linear-gradient(45deg, #007bff, #0056b3) !important;
+    }
+    
+    .bg-warning {
+        background: linear-gradient(45deg, #ffc107, #e0a800) !important;
+    }
+    
+    .bg-success {
+        background: linear-gradient(45deg, #28a745, #1e7e34) !important;
+    }
+    
+    .bg-danger {
+        background: linear-gradient(45deg, #dc3545, #c82333) !important;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+    }
+</style>
