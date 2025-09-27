@@ -179,7 +179,7 @@ namespace Biblioteca.Controllers
 
             try
             {
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
                 
                 using (var stream = new MemoryStream())
                 {

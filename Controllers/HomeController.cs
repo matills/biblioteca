@@ -1,7 +1,7 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using Biblioteca.Models;
 using Biblioteca.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Biblioteca.Controllers
 {
@@ -25,7 +25,7 @@ namespace Biblioteca.Controllers
                     TotalLibros = await _bibliotecaService.GetTotalLibrosAsync(),
                     TotalUsuarios = await _bibliotecaService.GetTotalUsuariosAsync(),
                     PrestamosActivos = await _bibliotecaService.GetPrestamosActivosAsync(),
-                    PrestamosVencidos = await _bibliotecaService.GetPrestamosVencidosAsync(),
+                    PrestamosVencidos = await _bibliotecaService.GetPrestamosVencidosCountAsync(),
                     LibrosMasPrestados = await _bibliotecaService.GetLibrosMasPrestadosAsync(5),
                     UsuariosMasActivos = await _bibliotecaService.GetUsuariosMasActivosAsync(5),
                     PrestamosProximosVencer = await _bibliotecaService.GetPrestamosProximosVencerAsync(3)
@@ -39,7 +39,7 @@ namespace Biblioteca.Controllers
                 ViewBag.UsuariosMasActivos = estadisticas.UsuariosMasActivos;
                 ViewBag.PrestamosProximosVencer = estadisticas.PrestamosProximosVencer;
 
-                _logger.LogInformation("Dashboard cargado exitosamente con {TotalLibros} libros y {TotalUsuarios} usuarios", 
+                _logger.LogInformation("Dashboard cargado exitosamente con {TotalLibros} libros y {TotalUsuarios} usuarios",
                     estadisticas.TotalLibros, estadisticas.TotalUsuarios);
 
                 return View();
@@ -62,7 +62,7 @@ namespace Biblioteca.Controllers
             try
             {
                 var reporte = await _bibliotecaService.GenerarReporteEstadisticasAsync();
-                
+
                 return Content(reporte, "text/plain", System.Text.Encoding.UTF8);
             }
             catch (Exception ex)
@@ -83,7 +83,7 @@ namespace Biblioteca.Controllers
                     totalLibros = await _bibliotecaService.GetTotalLibrosAsync(),
                     totalUsuarios = await _bibliotecaService.GetTotalUsuariosAsync(),
                     prestamosActivos = await _bibliotecaService.GetPrestamosActivosAsync(),
-                    prestamosVencidos = await _bibliotecaService.GetPrestamosVencidosAsync(),
+                    prestamosVencidos = await _bibliotecaService.GetPrestamosVencidosCountAsync(),
                     fechaActualizacion = DateTime.Now
                 };
 

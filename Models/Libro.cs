@@ -11,12 +11,12 @@ namespace Biblioteca.Models
         [Required(ErrorMessage = "El título es obligatorio")]
         [StringLength(200, ErrorMessage = "El título no puede exceder 200 caracteres")]
         [Display(Name = "Título")]
-        public string Titulo { get; set; }
-        
+        public required string Titulo { get; set; }
+
         [Required(ErrorMessage = "El ISBN es obligatorio")]
         [StringLength(20)]
         [RegularExpression(@"^[0-9\-]*$", ErrorMessage = "El ISBN solo puede contener números y guiones")]
-        public string ISBN { get; set; }
+        public required string ISBN { get; set; }
         
         [Display(Name = "Año de Publicación")]
         [Range(1000, 2024, ErrorMessage = "Año debe estar entre 1000 y 2024")]

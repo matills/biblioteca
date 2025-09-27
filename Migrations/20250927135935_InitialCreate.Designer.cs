@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Biblioteca.Migrations
 {
     [DbContext(typeof(BibliotecaContext))]
-    [Migration("20250926202907_InitialCreate")]
+    [Migration("20250927135935_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -34,7 +34,6 @@ namespace Biblioteca.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AutorId"));
 
                     b.Property<string>("Biografia")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -47,7 +46,6 @@ namespace Biblioteca.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Pais")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 

@@ -1,6 +1,7 @@
-using Microsoft.EntityFrameworkCore;
 using Biblioteca.Data;
 using Biblioteca.Models;
+using Biblioteca.Services;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 
 namespace Biblioteca.Services
@@ -29,10 +30,10 @@ namespace Biblioteca.Services
             return await _context.Prestamos.CountAsync(p => p.Estado == "Activo");
         }
 
-        public async Task<int> GetPrestamosVencidosAsync()
+        public async Task<int> GetPrestamosVencidosCountAsync()
         {
-            return await _context.Prestamos.CountAsync(p => 
-                p.Estado == "Vencido" || 
+            return await _context.Prestamos.CountAsync(p =>
+                p.Estado == "Vencido" ||
                 (p.Estado == "Activo" && p.FechaDevolucionEsperada < DateTime.Now));
         }
 
@@ -52,9 +53,9 @@ namespace Biblioteca.Services
             return await _context.Libros
                 .Include(l => l.Autor)
                 .Include(l => l.Categoria)
-                .Select(l => new { 
-                    Libro = l, 
-                    TotalPrestamos = l.Prestamos.Count 
+                .Select(l => new {
+                    Libro = l,
+                    TotalPrestamos = l.Prestamos.Count
                 })
                 .OrderByDescending(x => x.TotalPrestamos)
                 .Take(cantidad)
@@ -65,9 +66,9 @@ namespace Biblioteca.Services
         public async Task<List<Usuario>> GetUsuariosMasActivosAsync(int cantidad = 10)
         {
             return await _context.Usuarios
-                .Select(u => new { 
-                    Usuario = u, 
-                    TotalPrestamos = u.Prestamos.Count 
+                .Select(u => new {
+                    Usuario = u,
+                    TotalPrestamos = u.Prestamos.Count
                 })
                 .OrderByDescending(x => x.TotalPrestamos)
                 .Take(cantidad)
@@ -78,8 +79,8 @@ namespace Biblioteca.Services
         public async Task<bool> PuedeRealizarPrestamoAsync(int usuarioId)
         {
             var tieneVencidos = await _context.Prestamos
-                .AnyAsync(p => p.UsuarioId == usuarioId && 
-                          (p.Estado == "Vencido" || 
+                .AnyAsync(p => p.UsuarioId == usuarioId &&
+                          (p.Estado == "Vencido" ||
                            (p.Estado == "Activo" && p.FechaDevolucionEsperada < DateTime.Now)));
 
             if (tieneVencidos) return false;
@@ -93,16 +94,16 @@ namespace Biblioteca.Services
         public async Task<string> GenerarReporteEstadisticasAsync()
         {
             var sb = new StringBuilder();
-            
+
             sb.AppendLine("=== REPORTE ESTADÍSTICAS BIBLIOTECA ===");
             sb.AppendLine($"Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}");
             sb.AppendLine();
-            
+
             var totalLibros = await GetTotalLibrosAsync();
             var totalUsuarios = await GetTotalUsuariosAsync();
             var prestamosActivos = await GetPrestamosActivosAsync();
-            var prestamosVencidos = await GetPrestamosVencidosAsync();
-            
+            var prestamosVencidos = await GetPrestamosVencidosCountAsync();
+
             sb.AppendLine("ESTADÍSTICAS GENERALES:");
             sb.AppendLine($"- Total de Libros: {totalLibros}");
             sb.AppendLine($"- Total de Usuarios: {totalUsuarios}");
@@ -135,19 +136,19 @@ namespace Biblioteca.Services
         public async Task<List<Prestamo>> GetPrestamosProximosVencerAsync(int dias = 3)
         {
             var fechaLimite = DateTime.Now.AddDays(dias);
-            
+
             return await _context.Prestamos
                 .Include(p => p.Usuario)
                 .Include(p => p.Libro)
                     .ThenInclude(l => l.Autor)
-                .Where(p => p.Estado == "Activo" && 
+                .Where(p => p.Estado == "Activo" &&
                            p.FechaDevolucionEsperada <= fechaLimite &&
                            p.FechaDevolucionEsperada >= DateTime.Now)
                 .OrderBy(p => p.FechaDevolucionEsperada)
                 .ToListAsync();
         }
 
-        public async Task<List<Prestamo>> GetPrestamosVencidosAsync()
+        public async Task<List<Prestamo>> GetPrestamosVencidosListAsync()
         {
             return await _context.Prestamos
                 .Include(p => p.Usuario)

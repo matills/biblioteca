@@ -1,0 +1,75 @@
+@model Biblioteca.Models.Categoria
+
+@{
+    ViewData["Title"] = "Crear Categoría";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="fas fa-tag"></i> @ViewData["Title"]</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label fw-bold"></label>
+                            <input asp-for="Nombre" class="form-control" placeholder="Nombre de la categoría" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Descripcion" class="form-label fw-bold"></label>
+                            <textarea asp-for="Descripcion" class="form-control" rows="4" 
+                                    placeholder="Descripción de la categoría (opcional)"></textarea>
+                            <span asp-validation-for="Descripcion" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-secondary btn-lg me-2">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> Guardar Categoría
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        background: linear-gradient(45deg, #28a745, #20c997) !important;
+        border-radius: 15px 15px 0 0 !important;
+    }
+    
+    .form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+    }
+    
+    .btn-success:hover {
+        background: linear-gradient(45deg, #1e7e34, #17a2b8);
+        transform: translateY(-1px);
+    }
+</style>

@@ -1,3 +1,13 @@
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.csproj.AssemblyReference.cache
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\rpswa.dswa.cache.json
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.AssemblyInfoInputs.cache
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.AssemblyInfo.cs
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.csproj.CoreCompileInputs.cache
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.RazorAssemblyInfo.cache
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.RazorAssemblyInfo.cs
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.sourcelink.json
 C:\Users\maty_\Workspace\Biblioteca\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\maty_\Workspace\Biblioteca\bin\Debug\net9.0\appsettings.json
 C:\Users\maty_\Workspace\Biblioteca\bin\Debug\net9.0\Biblioteca.staticwebassets.runtime.json
@@ -151,15 +161,6 @@ C:\Users\maty_\Workspace\Biblioteca\bin\Debug\net9.0\runtimes\win\lib\net6.0\Sys
 C:\Users\maty_\Workspace\Biblioteca\bin\Debug\net9.0\runtimes\win\lib\net9.0\System.Security.Cryptography.Pkcs.dll
 C:\Users\maty_\Workspace\Biblioteca\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\maty_\Workspace\Biblioteca\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
-C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.csproj.AssemblyReference.cache
-C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\rpswa.dswa.cache.json
-C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.AssemblyInfoInputs.cache
-C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.AssemblyInfo.cs
-C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.csproj.CoreCompileInputs.cache
-C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.RazorAssemblyInfo.cache
-C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.RazorAssemblyInfo.cs
 C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\rjimswa.dswa.cache.json
 C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
 C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
@@ -240,3 +241,4 @@ C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\refint\Biblioteca.dll
 C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.pdb
 C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\Biblioteca.genruntimeconfig.cache
 C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\ref\Biblioteca.dll
+C:\Users\maty_\Workspace\Biblioteca\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt
