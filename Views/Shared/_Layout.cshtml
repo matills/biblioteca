@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -64,30 +64,29 @@
                             </ul>
                         </li>
                         
-                        <!-- Menú de Reportes -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-chart-bar"></i> Reportes
                             </a>
                             <ul class="dropdown-menu shadow">
                                 <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="fas fa-chart-line text-success"></i> Libros más prestados
+                                    <a class="dropdown-item" asp-controller="Usuarios" asp-action="Reporte">
+                                        <i class="fas fa-chart-line text-success"></i> Reporte de Usuarios
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" asp-controller="Home" asp-action="GenerarReporte">
+                                        <i class="fas fa-file-excel text-success"></i> Descargar Excel
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Prestamos" asp-action="Index" asp-route-filtro="vencidos">
                                         <i class="fas fa-clock text-warning"></i> Préstamos vencidos
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="fas fa-users text-info"></i> Usuarios activos
                                     </a>
                                 </li>
                             </ul>
                         </li>
-                        
+
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">
                                 <i class="fas fa-shield-alt"></i> Privacy

@@ -1,0 +1,224 @@
+@model IEnumerable<Biblioteca.Models.Usuario>
+
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary"><i class="fas fa-users"></i> @ViewData["Title"]</h2>
+                <div class="btn-group">
+                    <a asp-action="Create" class="btn btn-success btn-lg me-2">
+                        <i class="fas fa-plus"></i> Nuevo Usuario
+                    </a>
+                    <a asp-action="Reporte" class="btn btn-info btn-lg">
+                        <i class="fas fa-chart-bar"></i> Reporte
+                    </a>
+                </div>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <input type="text" id="filtroNombre" class="form-control" placeholder="Buscar por nombre...">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" id="filtroEmail" class="form-control" placeholder="Buscar por email...">
+                        </div>
+                        <div class="col-md-2">
+                            <select id="filtroEstado" class="form-select">
+                                <option value="">Todos</option>
+                                <option value="activo">Con préstamos activos</option>
+                                <option value="sinprestamos">Sin préstamos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped" id="tablaUsuarios">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>@Html.DisplayNameFor(model => model.Nombre)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Email)</th>
+                                    <th>@Html.DisplayNameFor(model => model.Telefono)</th>
+                                    <th>Fecha de Registro</th>
+                                    <th>Préstamos Activos</th>
+                                    <th>Total Préstamos</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    var prestamosActivos = item.Prestamos.Where(p => p.Estado == "Activo").Count();
+                                    var totalPrestamos = item.Prestamos.Count();
+                                    var tieneVencidos = item.Prestamos.Any(p => p.Estado == "Vencido");
+                                    
+                                    <tr>
+                                        <td>
+                                            <strong>@Html.DisplayFor(modelItem => item.Nombre)</strong>
+                                            @if (tieneVencidos)
+                                            {
+                                                <br><span class="badge bg-warning"><i class="fas fa-exclamation-triangle"></i> Tiene vencidos</span>
+                                            }
+                                        </td>
+                                        <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                                        <td>@Html.DisplayFor(modelItem => item.Telefono)</td>
+                                        <td>@item.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            @if (prestamosActivos > 0)
+                                            {
+                                                <span class="badge bg-success">@prestamosActivos</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">0</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">@totalPrestamos</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Details" asp-route-id="@item.UsuarioId" 
+                                                   class="btn btn-info btn-sm" title="Ver Detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@item.UsuarioId" 
+                                                   class="btn btn-warning btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                @if (prestamosActivos == 0)
+                                                {
+                                                    <a asp-action="Delete" asp-route-id="@item.UsuarioId" 
+                                                       class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" class="btn btn-secondary btn-sm" disabled title="No se puede eliminar (tiene préstamos activos)">
+                                                        <i class="fas fa-ban"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+    }
+    
+    .btn-info {
+        background: linear-gradient(45deg, #17a2b8, #007bff);
+        border: none;
+    }
+    
+    .btn-success:hover, .btn-info:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .table th {
+        background: linear-gradient(45deg, #343a40, #495057) !important;
+        border: none;
+    }
+    
+    .btn-group .btn {
+        margin: 0 1px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.getElementById('filtroNombre').addEventListener('keyup', filtrarTabla);
+        document.getElementById('filtroEmail').addEventListener('keyup', filtrarTabla);
+        document.getElementById('filtroEstado').addEventListener('change', filtrarTabla);
+
+        function filtrarTabla() {
+            const filtroNombre = document.getElementById('filtroNombre').value.toLowerCase();
+            const filtroEmail = document.getElementById('filtroEmail').value.toLowerCase();
+            const filtroEstado = document.getElementById('filtroEstado').value;
+            
+            const filas = document.querySelectorAll('#tablaUsuarios tbody tr');
+            
+            filas.forEach(fila => {
+                const nombre = fila.cells[0].textContent.toLowerCase();
+                const email = fila.cells[1].textContent.toLowerCase();
+                const prestamosActivos = parseInt(fila.cells[4].textContent.trim()) || 0;
+                const totalPrestamos = parseInt(fila.cells[5].textContent.trim()) || 0;
+                
+                let mostrar = true;
+                
+                if (filtroNombre && !nombre.includes(filtroNombre)) {
+                    mostrar = false;
+                }
+                
+                if (filtroEmail && !email.includes(filtroEmail)) {
+                    mostrar = false;
+                }
+                
+                if (filtroEstado === 'activo' && prestamosActivos === 0) {
+                    mostrar = false;
+                }
+                
+                if (filtroEstado === 'sinprestamos' && totalPrestamos > 0) {
+                    mostrar = false;
+                }
+                
+                fila.style.display = mostrar ? '' : 'none';
+            });
+        }
+        
+        function limpiarFiltros() {
+            document.getElementById('filtroNombre').value = '';
+            document.getElementById('filtroEmail').value = '';
+            document.getElementById('filtroEstado').value = '';
+            filtrarTabla();
+        }
+    </script>
+}

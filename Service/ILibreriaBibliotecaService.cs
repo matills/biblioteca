@@ -13,6 +13,7 @@ namespace Biblioteca.Services
         Task<List<Usuario>> GetUsuariosMasActivosAsync(int cantidad = 10);
         Task<bool> PuedeRealizarPrestamoAsync(int usuarioId);
         Task<string> GenerarReporteEstadisticasAsync();
+        Task<byte[]> GenerarReporteExcelAsync();
         Task<List<Prestamo>> GetPrestamosProximosVencerAsync(int dias = 3);
         Task<List<Prestamo>> GetPrestamosVencidosListAsync();
     }

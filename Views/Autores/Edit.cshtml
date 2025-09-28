@@ -1,0 +1,126 @@
+@model Biblioteca.Models.Autor
+
+@{
+    ViewData["Title"] = "Editar Autor";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-edit"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="AutorId" />
+
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label fw-bold">Nombre Completo</label>
+                            <input asp-for="Nombre" class="form-control" placeholder="Ingrese el nombre completo del autor" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FechaNacimiento" class="form-label fw-bold">Fecha de Nacimiento <small class="text-muted">(Opcional)</small></label>
+                                    <input asp-for="FechaNacimiento" class="form-control" type="date" />
+                                    <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Pais" class="form-label fw-bold">País de Origen <small class="text-muted">(Opcional)</small></label>
+                                    <input asp-for="Pais" class="form-control" placeholder="Ej: Argentina, España, México..." />
+                                    <span asp-validation-for="Pais" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Biografia" class="form-label fw-bold">Biografía <small class="text-muted">(Opcional)</small></label>
+                            <textarea asp-for="Biografia" class="form-control" rows="5" 
+                                      placeholder="Breve biografía del autor, logros, obras destacadas, etc."></textarea>
+                            <span asp-validation-for="Biografia" class="text-danger"></span>
+                        </div>
+
+                        @if (Model.Libros.Any())
+                        {
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle"></i> Información de libros:</h6>
+                                <p class="mb-0">Este autor tiene <strong>@Model.Libros.Count libro(s)</strong> registrado(s) en el sistema.</p>
+                            </div>
+                        }
+
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Importante:</h6>
+                            <ul class="mb-0">
+                                <li>El nombre del autor es obligatorio.</li>
+                                <li>Los demás campos son opcionales y pueden completarse más tarde.</li>
+                                <li>Los cambios en la información del autor no afectan los libros existentes.</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
+        border: none;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(45deg, #6c757d, #495057);
+        border: none;
+    }
+    
+    .btn-warning:hover, .btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+    }
+    
+    .form-label {
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

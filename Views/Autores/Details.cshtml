@@ -1,0 +1,179 @@
+@model Biblioteca.Models.Autor
+
+@{
+    ViewData["Title"] = "Detalles del Autor";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-circle"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="text-primary mb-3"><i class="fas fa-id-card"></i> Información Personal</h5>
+                            <div class="mb-3">
+                                <strong>Nombre:</strong> @Html.DisplayFor(model => model.Nombre)
+                            </div>
+                            @if (Model.FechaNacimiento.HasValue)
+                            {
+                                <div class="mb-3">
+                                    <strong>Fecha de Nacimiento:</strong> @Model.FechaNacimiento.Value.ToString("dd/MM/yyyy")
+                                    @{
+                                        var edad = DateTime.Now.Year - Model.FechaNacimiento.Value.Year;
+                                        if (DateTime.Now.DayOfYear < Model.FechaNacimiento.Value.DayOfYear)
+                                            edad--;
+                                    }
+                                    <small class="text-muted">(@edad años)</small>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Pais))
+                            {
+                                <div class="mb-3">
+                                    <strong>País de Origen:</strong> @Html.DisplayFor(model => model.Pais)
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Biografia))
+                            {
+                                <div class="mb-3">
+                                    <strong>Biografía:</strong>
+                                    <div class="mt-2 p-3 bg-light rounded">
+                                        @Html.DisplayFor(model => model.Biografia)
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-books"></i> Libros Publicados</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Libros.Any())
+                    {
+                        <div class="row">
+                            @foreach (var libro in Model.Libros)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title">@libro.Titulo</h6>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    Año: @libro.AnoPublicacion | 
+                                                    Páginas: @libro.NumeroPaginas |
+                                                    Disponibles: @libro.CantidadDisponible
+                                                </small>
+                                            </p>
+                                            <a asp-controller="Libros" asp-action="Details" asp-route-id="@libro.LibroId" 
+                                               class="btn btn-sm btn-outline-primary">Ver Detalles</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-book-open fa-3x mb-3"></i>
+                            <p>Este autor aún no tiene libros registrados en el sistema.</p>
+                            <a asp-controller="Libros" asp-action="Create" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Agregar Primer Libro
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cogs"></i> Acciones</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.AutorId" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Editar Autor
+                        </a>
+                        @if (!Model.Libros.Any())
+                        {
+                            <a asp-action="Delete" asp-route-id="@Model.AutorId" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Eliminar Autor
+                            </a>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-secondary" disabled title="No se puede eliminar (tiene libros registrados)">
+                                <i class="fas fa-ban"></i> No se puede eliminar
+                            </button>
+                        }
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver a la Lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mt-3">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-chart-bar"></i> Estadísticas</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body py-2">
+                                    <h4>@Model.Libros.Count</h4>
+                                    <small>Libros</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-success text-white">
+                                <div class="card-body py-2">
+                                    <h4>@Model.Libros.Sum(l => l.CantidadDisponible)</h4>
+                                    <small>Ejemplares</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
+        border: none;
+        color: white;
+    }
+    
+    .btn-info {
+        background: linear-gradient(45deg, #17a2b8, #007bff);
+        border: none;
+    }
+    
+    .btn-warning:hover, .btn-info:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+</style>

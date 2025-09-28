@@ -24,7 +24,7 @@ namespace Biblioteca.Models
         
         [StringLength(200)]
         [Display(Name = "Dirección")]
-        public string Direccion { get; set; }
+        public string? Direccion { get; set; }
         
         [Display(Name = "Fecha de Registro")]
         [DataType(DataType.Date)]

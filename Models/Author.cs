@@ -10,7 +10,7 @@ namespace Biblioteca.Models
         [Required(ErrorMessage = "El nombre es obligatorio")]
         [StringLength(100, ErrorMessage = "El nombre no puede exceder 100 caracteres")]
         [Display(Name = "Nombre Completo")]
-        public required string Nombre { get; set; }
+        public string Nombre { get; set; } = string.Empty;
         
         [Display(Name = "Fecha de Nacimiento")]
         [DataType(DataType.Date)]

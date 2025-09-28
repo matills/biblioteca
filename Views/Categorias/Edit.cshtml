@@ -1,0 +1,122 @@
+@model Biblioteca.Models.Categoria
+
+@{
+    ViewData["Title"] = "Editar Categoría";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-tag"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="CategoriaId" />
+
+                        <div class="mb-3">
+                            <label asp-for="Nombre" class="form-label fw-bold">Nombre de la Categoría</label>
+                            <input asp-for="Nombre" class="form-control" placeholder="Ingrese el nombre de la categoría" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                            <div class="form-text">El nombre debe ser único y descriptivo.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Descripcion" class="form-label fw-bold">Descripción <small class="text-muted">(Opcional)</small></label>
+                            <textarea asp-for="Descripcion" class="form-control" rows="4" 
+                                      placeholder="Descripción detallada de la categoría, tipos de libros que incluye, etc."></textarea>
+                            <span asp-validation-for="Descripcion" class="text-danger"></span>
+                            <div class="form-text">Ayuda a los usuarios a entender qué tipo de libros pertenecen a esta categoría.</div>
+                        </div>
+
+                        @if (Model.Libros.Any())
+                        {
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle"></i> Información de libros:</h6>
+                                <p class="mb-2">Esta categoría tiene <strong>@Model.Libros.Count libro(s)</strong> asignado(s):</p>
+                                <ul class="mb-0 small">
+                                    @foreach (var libro in Model.Libros.Take(3))
+                                    {
+                                        <li>@libro.Titulo (@libro.AnoPublicacion)</li>
+                                    }
+                                    @if (Model.Libros.Count > 3)
+                                    {
+                                        <li class="text-muted">Y @(Model.Libros.Count - 3) libro(s) más...</li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-exclamation-triangle"></i> Importante:</h6>
+                            <ul class="mb-0">
+                                <li>El nombre de la categoría es obligatorio y debe ser único.</li>
+                                <li>La descripción es opcional pero recomendada.</li>
+                                <li>Los cambios no afectan los libros ya asignados a esta categoría.</li>
+                                <li>Si tiene libros asignados, no podrá eliminar la categoría.</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
+        border: none;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(45deg, #6c757d, #495057);
+        border: none;
+    }
+    
+    .btn-warning:hover, .btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+    }
+    
+    .form-label {
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

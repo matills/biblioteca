@@ -27,7 +27,7 @@ namespace Biblioteca.Models
         public string Estado { get; set; } = "Activo"; // Activo, Devuelto, Vencido
         
         [StringLength(500)]
-        public string Observaciones { get; set; }
+        public string? Observaciones { get; set; }
 
         [Required]
         [Display(Name = "Usuario")]

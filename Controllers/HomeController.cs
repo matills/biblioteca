@@ -51,7 +51,6 @@ namespace Biblioteca.Controllers
                 return View();
             }
         }
-
         public IActionResult Privacy()
         {
             return View();
@@ -61,14 +60,15 @@ namespace Biblioteca.Controllers
         {
             try
             {
-                var reporte = await _bibliotecaService.GenerarReporteEstadisticasAsync();
-
-                return Content(reporte, "text/plain", System.Text.Encoding.UTF8);
+                var excelBytes = await _bibliotecaService.GenerarReporteExcelAsync();
+                var fileName = $"Reporte_Biblioteca_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                
+                return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al generar el reporte");
-                TempData["Error"] = "Error al generar el reporte";
+                _logger.LogError(ex, "Error al generar el reporte Excel");
+                TempData["Error"] = "Error al generar el reporte Excel";
                 return RedirectToAction(nameof(Index));
             }
         }

@@ -1,0 +1,176 @@
+@model Biblioteca.Models.Usuario
+
+@{
+    ViewData["Title"] = "Nuevo Usuario";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-plus"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Nombre" class="form-label fw-bold">Nombre Completo</label>
+                                    <input asp-for="Nombre" class="form-control" placeholder="Ingrese el nombre completo" />
+                                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label fw-bold">Email</label>
+                                    <input asp-for="Email" class="form-control" type="email" placeholder="usuario@ejemplo.com" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                    <div id="emailValidation" class="form-text"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Telefono" class="form-label fw-bold">Teléfono</label>
+                                    <input asp-for="Telefono" class="form-control" placeholder="Ej: +54 11 1234-5678" />
+                                    <span asp-validation-for="Telefono" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FechaRegistro" class="form-label fw-bold">Fecha de Registro</label>
+                                    <input asp-for="FechaRegistro" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly />
+                                    <span asp-validation-for="FechaRegistro" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Direccion" class="form-label fw-bold">Dirección <small class="text-muted">(Opcional)</small></label>
+                            <textarea asp-for="Direccion" class="form-control" rows="2" 
+                                      placeholder="Ingrese la dirección completa..."></textarea>
+                            <span asp-validation-for="Direccion" class="text-danger"></span>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> Información importante:</h6>
+                            <ul class="mb-0">
+                                <li>El email debe ser único en el sistema.</li>
+                                <li>Todos los campos marcados con * son obligatorios.</li>
+                                <li>El usuario podrá realizar préstamos una vez registrado.</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                            <button type="submit" class="btn btn-success" id="btnGuardar">
+                                <i class="fas fa-save"></i> Crear Usuario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(45deg, #6c757d, #495057);
+        border: none;
+    }
+    
+    .btn-success:hover, .btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    .form-label {
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.getElementById('Email').addEventListener('blur', function() {
+            const email = this.value;
+            const validationDiv = document.getElementById('emailValidation');
+            const btnGuardar = document.getElementById('btnGuardar');
+            
+            if (!email) {
+                validationDiv.innerHTML = '';
+                btnGuardar.disabled = false;
+                return;
+            }
+            
+            fetch('@Url.Action("VerificarEmail")?email=' + encodeURIComponent(email))
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        validationDiv.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Email disponible</span>';
+                        btnGuardar.disabled = false;
+                    } else {
+                        validationDiv.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle"></i> Este email ya está registrado</span>';
+                        btnGuardar.disabled = true;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    validationDiv.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Error al verificar email</span>';
+                });
+        });
+        
+        document.getElementById('Telefono').addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            
+            if (value.length > 0) {
+                if (value.length <= 2) {
+                    value = '+' + value;
+                } else if (value.length <= 4) {
+                    value = '+' + value.substring(0, 2) + ' ' + value.substring(2);
+                } else if (value.length <= 6) {
+                    value = '+' + value.substring(0, 2) + ' ' + value.substring(2, 4) + ' ' + value.substring(4);
+                } else {
+                    value = '+' + value.substring(0, 2) + ' ' + value.substring(2, 4) + ' ' + value.substring(4, 8) + '-' + value.substring(8, 12);
+                }
+            }
+            
+            this.value = value;
+        });
+    </script>
+}

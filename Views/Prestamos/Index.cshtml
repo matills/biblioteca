@@ -1,0 +1,286 @@
+@model IEnumerable<Biblioteca.Models.Prestamo>
+
+@{
+    ViewData["Title"] = "Gestión de Préstamos";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary"><i class="fas fa-handshake"></i> @ViewData["Title"]</h2>
+                <a asp-action="Create" class="btn btn-success btn-lg">
+                    <i class="fas fa-plus"></i> Nuevo Préstamo
+                </a>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h4>@ViewBag.TotalPrestamos</h4>
+                            <p class="mb-0">Total Préstamos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h4>@ViewBag.PrestamosActivos</h4>
+                            <p class="mb-0">Activos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h4>@ViewBag.PrestamosVencidos</h4>
+                            <p class="mb-0">Vencidos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h4>@ViewBag.PrestamosDevueltos</h4>
+                            <p class="mb-0">Devueltos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-group w-100" role="group">
+                                <a href="@Url.Action("Index", new { filtro = "todos" })" 
+                                   class="btn @(ViewBag.FiltroActual == "todos" ? "btn-primary" : "btn-outline-primary")">
+                                    Todos
+                                </a>
+                                <a href="@Url.Action("Index", new { filtro = "activos" })" 
+                                   class="btn @(ViewBag.FiltroActual == "activos" ? "btn-success" : "btn-outline-success")">
+                                    Activos
+                                </a>
+                                <a href="@Url.Action("Index", new { filtro = "vencidos" })" 
+                                   class="btn @(ViewBag.FiltroActual == "vencidos" ? "btn-warning" : "btn-outline-warning")">
+                                    Vencidos
+                                </a>
+                                <a href="@Url.Action("Index", new { filtro = "devueltos" })" 
+                                   class="btn @(ViewBag.FiltroActual == "devueltos" ? "btn-info" : "btn-outline-info")">
+                                    Devueltos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Libro</th>
+                                    <th>Fecha Préstamo</th>
+                                    <th>Fecha Devolución</th>
+                                    <th>Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@Html.DisplayFor(modelItem => item.Usuario.Nombre)</strong><br>
+                                            <small class="text-muted">@Html.DisplayFor(modelItem => item.Usuario.Email)</small>
+                                        </td>
+                                        <td>
+                                            <strong>@Html.DisplayFor(modelItem => item.Libro.Titulo)</strong><br>
+                                            <small class="text-muted">@Html.DisplayFor(modelItem => item.Libro.Autor.Nombre)</small>
+                                        </td>
+                                        <td>@item.FechaPrestamo.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            @item.FechaDevolucionEsperada.ToString("dd/MM/yyyy")
+                                            @if (item.FechaDevolucionReal.HasValue)
+                                            {
+                                                <br><small class="text-success">Devuelto: @item.FechaDevolucionReal.Value.ToString("dd/MM/yyyy")</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.Estado == "Activo")
+                                            {
+                                                @if (item.FechaDevolucionEsperada < DateTime.Now)
+                                                {
+                                                    <span class="badge bg-warning">Vencido</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">@item.Estado</span>
+                                                }
+                                            }
+                                            else if (item.Estado == "Devuelto")
+                                            {
+                                                <span class="badge bg-info">@item.Estado</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">@item.Estado</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Details" asp-route-id="@item.PrestamoId" 
+                                                   class="btn btn-info btn-sm" title="Ver Detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                @if (item.Estado == "Activo" || item.Estado == "Vencido")
+                                                {
+                                                    <button type="button" class="btn btn-success btn-sm" 
+                                                            onclick="devolverPrestamo(@item.PrestamoId)" title="Devolver">
+                                                        <i class="fas fa-undo"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-warning btn-sm" 
+                                                            onclick="renovarPrestamo(@item.PrestamoId)" title="Renovar">
+                                                        <i class="fas fa-sync"></i>
+                                                    </button>
+                                                }
+                                                <a asp-action="Edit" asp-route-id="@item.PrestamoId" 
+                                                   class="btn btn-warning btn-sm" title="Editar">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                @if (item.Estado != "Activo")
+                                                {
+                                                    <a asp-action="Delete" asp-route-id="@item.PrestamoId" 
+                                                       class="btn btn-danger btn-sm" title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="devolverModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formDevolver" method="post">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Devolver Préstamo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones (opcional):</label>
+                        <textarea name="observaciones" class="form-control" rows="3" 
+                                  placeholder="Ingrese observaciones sobre la devolución..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Devolución</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+    }
+    
+    .btn-info {
+        background: linear-gradient(45deg, #17a2b8, #007bff);
+        border: none;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
+        border: none;
+        color: white;
+    }
+    
+    .btn-success:hover, .btn-info:hover, .btn-warning:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .table th {
+        background: linear-gradient(45deg, #343a40, #495057) !important;
+        border: none;
+    }
+    
+    .btn-group .btn {
+        margin: 0 1px;
+    }
+    
+    .modal-content {
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function devolverPrestamo(id) {
+            document.getElementById('formDevolver').action = '@Url.Action("Devolver")/' + id;
+            new bootstrap.Modal(document.getElementById('devolverModal')).show();
+        }
+
+        function renovarPrestamo(id) {
+            if (confirm('¿Está seguro de renovar este préstamo por 15 días más?')) {
+                fetch('@Url.Action("RenovarPrestamo")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+            }
+        }
+    </script>
+}

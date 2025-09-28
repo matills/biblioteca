@@ -1,0 +1,239 @@
+@model Biblioteca.Models.Libro
+
+@{
+    ViewData["Title"] = "Eliminar Libro";
+    var prestamosActivos = Model.Prestamos.Where(p => p.Estado == "Activo").ToList();
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-book"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle"></i> ¿Está seguro de que desea eliminar este libro?</h5>
+                        <p class="mb-0">Esta acción no se puede deshacer y eliminará toda la información del libro, incluyendo su historial de préstamos.</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            @if (!string.IsNullOrEmpty(Model.ImagenPortada))
+                            {
+                                <div class="text-center mb-3">
+                                    <img src="@Model.ImagenPortada" alt="Portada" class="img-fluid rounded shadow" style="max-height: 300px;">
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center mb-3 p-4 bg-light border rounded">
+                                    <i class="fas fa-book fa-4x text-muted mb-2"></i>
+                                    <p class="text-muted">Sin imagen de portada</p>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <h6 class="text-primary mb-3"><i class="fas fa-info-circle"></i> Información del Libro</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <strong>Título:</strong> @Html.DisplayFor(model => model.Titulo)
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>ISBN:</strong> @Html.DisplayFor(model => model.ISBN)
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Autor:</strong> @Html.DisplayFor(model => model.Autor.Nombre)
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Categoría:</strong> 
+                                        <span class="badge bg-info">@Html.DisplayFor(model => model.Categoria.Nombre)</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <strong>Año:</strong> @Html.DisplayFor(model => model.AnoPublicacion)
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Páginas:</strong> @Html.DisplayFor(model => model.NumeroPaginas)
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Ejemplares:</strong> 
+                                        <span class="badge bg-success">@Html.DisplayFor(model => model.CantidadDisponible)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Descripcion))
+                            {
+                                <div class="mb-2">
+                                    <strong>Descripción:</strong>
+                                    <div class="mt-1 p-2 bg-light rounded small">
+                                        @(Model.Descripcion.Length > 200 ? Model.Descripcion.Substring(0, 200) + "..." : Model.Descripcion)
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h6 class="text-primary mb-3"><i class="fas fa-chart-bar"></i> Estadísticas de Préstamos</h6>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card bg-success text-white text-center">
+                                        <div class="card-body py-2">
+                                            <h5>@prestamosActivos.Count</h5>
+                                            <small>Activos</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-warning text-white text-center">
+                                        <div class="card-body py-2">
+                                            <h5>@Model.Prestamos.Count(p => p.Estado == "Vencido")</h5>
+                                            <small>Vencidos</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-info text-white text-center">
+                                        <div class="card-body py-2">
+                                            <h5>@Model.Prestamos.Count(p => p.Estado == "Devuelto")</h5>
+                                            <small>Devueltos</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-primary text-white text-center">
+                                        <div class="card-body py-2">
+                                            <h5>@Model.Prestamos.Count</h5>
+                                            <small>Total</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (prestamosActivos.Any())
+                    {
+                        <div class="alert alert-danger mt-4">
+                            <h6><i class="fas fa-ban"></i> No se puede eliminar este libro</h6>
+                            <p>El libro tiene <strong>@prestamosActivos.Count préstamo(s) activo(s)</strong>. Debe esperar a que todos los préstamos sean devueltos antes de poder eliminar el libro.</p>
+                            
+                            <h6 class="mt-3">Préstamos activos:</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Usuario</th>
+                                            <th>Fecha Préstamo</th>
+                                            <th>Fecha Devolución</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var prestamo in prestamosActivos)
+                                        {
+                                            <tr>
+                                                <td><strong>@prestamo.Usuario?.Nombre</strong></td>
+                                                <td>@prestamo.FechaPrestamo.ToString("dd/MM/yyyy")</td>
+                                                <td>@prestamo.FechaDevolucionEsperada.ToString("dd/MM/yyyy")</td>
+                                                <td>
+                                                    @if (prestamo.FechaDevolucionEsperada < DateTime.Now)
+                                                    {
+                                                        <span class="badge bg-warning">Vencido</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-success">Activo</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <strong>Sugerencia:</strong> 
+                                <a asp-controller="Prestamos" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-handshake"></i> Ir a gestionar préstamos
+                                </a>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.Prestamos.Any())
+                    {
+                        <div class="alert alert-info mt-4">
+                            <h6><i class="fas fa-info-circle"></i> Historial de préstamos</h6>
+                            <p>Este libro tiene un historial de <strong>@Model.Prestamos.Count préstamo(s)</strong>, pero no tiene préstamos activos.</p>
+                            <p class="mb-0"><strong>Nota:</strong> Al eliminar el libro, también se eliminará su historial de préstamos.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success mt-4">
+                            <h6><i class="fas fa-check-circle"></i> Libro sin préstamos</h6>
+                            <p class="mb-0">Este libro no tiene préstamos registrados y puede ser eliminado sin problemas.</p>
+                        </div>
+                    }
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" asp-for="LibroId" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                            @if (!prestamosActivos.Any())
+                            {
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Está completamente seguro de eliminar este libro y todo su historial?')">
+                                    <i class="fas fa-trash"></i> Confirmar Eliminación
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-danger" disabled>
+                                    <i class="fas fa-ban"></i> No se puede eliminar
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-danger {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        border: none;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(45deg, #6c757d, #495057);
+        border: none;
+    }
+    
+    .btn-danger:hover, .btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    
+    .table th {
+        background: linear-gradient(45deg, #343a40, #495057) !important;
+        border: none;
+    }
+</style>

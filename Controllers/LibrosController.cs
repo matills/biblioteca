@@ -24,6 +24,8 @@ namespace Biblioteca.Controllers
                 .Include(l => l.Autor)
                 .Include(l => l.Categoria)
                 .ToListAsync();
+            
+            ViewBag.Categorias = await _context.Categorias.Select(c => c.Nombre).Distinct().ToListAsync();
             return View(libros);
         }
 
@@ -49,10 +51,10 @@ namespace Biblioteca.Controllers
             return View(libro);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["AutorId"] = new SelectList(_context.Autores, "AutorId", "Nombre");
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre");
+            ViewData["AutorId"] = new SelectList(await _context.Autores.ToListAsync(), "AutorId", "Nombre");
+            ViewData["CategoriaId"] = new SelectList(await _context.Categorias.ToListAsync(), "CategoriaId", "Nombre");
             return View();
         }
 
@@ -60,32 +62,54 @@ namespace Biblioteca.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("LibroId,Titulo,ISBN,AnoPublicacion,NumeroPaginas,Descripcion,CantidadDisponible,AutorId,CategoriaId")] Libro libro, IFormFile? imagenFile)
         {
-            if (ModelState.IsValid)
+            try
             {
-                if (imagenFile != null && imagenFile.Length > 0)
+                // Verificar si el ISBN ya existe
+                if (!string.IsNullOrEmpty(libro.ISBN) && await _context.Libros.AnyAsync(l => l.ISBN == libro.ISBN))
                 {
-                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "libros");
-                    Directory.CreateDirectory(uploadsFolder);
-                    
-                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imagenFile.FileName);
-                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                    
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await imagenFile.CopyToAsync(fileStream);
-                    }
-                    
-                    libro.ImagenPortada = "/images/libros/" + uniqueFileName;
+                    ModelState.AddModelError("ISBN", "Ya existe un libro con este ISBN");
                 }
 
-                _context.Add(libro);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Libro creado exitosamente";
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    // Procesar imagen si se subió una
+                    if (imagenFile != null && imagenFile.Length > 0)
+                    {
+                        try
+                        {
+                            string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "libros");
+                            Directory.CreateDirectory(uploadsFolder);
+                            
+                            string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imagenFile.FileName);
+                            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                            
+                            using (var fileStream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await imagenFile.CopyToAsync(fileStream);
+                            }
+                            
+                            libro.ImagenPortada = "/images/libros/" + uniqueFileName;
+                        }
+                        catch (Exception ex)
+                        {
+                            TempData["Warning"] = $"El libro se guardó pero hubo un error con la imagen: {ex.Message}";
+                        }
+                    }
+
+                    _context.Add(libro);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Libro creado exitosamente";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al crear el libro: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error en Create Libro: {ex}");
             }
 
-            ViewData["AutorId"] = new SelectList(_context.Autores, "AutorId", "Nombre", libro.AutorId);
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", libro.CategoriaId);
+            ViewData["AutorId"] = new SelectList(await _context.Autores.ToListAsync(), "AutorId", "Nombre", libro.AutorId);
+            ViewData["CategoriaId"] = new SelectList(await _context.Categorias.ToListAsync(), "CategoriaId", "Nombre", libro.CategoriaId);
             return View(libro);
         }
 
@@ -102,8 +126,8 @@ namespace Biblioteca.Controllers
                 return NotFound();
             }
 
-            ViewData["AutorId"] = new SelectList(_context.Autores, "AutorId", "Nombre", libro.AutorId);
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", libro.CategoriaId);
+            ViewData["AutorId"] = new SelectList(await _context.Autores.ToListAsync(), "AutorId", "Nombre", libro.AutorId);
+            ViewData["CategoriaId"] = new SelectList(await _context.Categorias.ToListAsync(), "CategoriaId", "Nombre", libro.CategoriaId);
             return View(libro);
         }
 
@@ -116,9 +140,14 @@ namespace Biblioteca.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            try
             {
-                try
+                if (!string.IsNullOrEmpty(libro.ISBN) && await _context.Libros.AnyAsync(l => l.ISBN == libro.ISBN && l.LibroId != id))
+                {
+                    ModelState.AddModelError("ISBN", "Ya existe otro libro con este ISBN");
+                }
+
+                if (ModelState.IsValid)
                 {
                     if (imagenFile != null && imagenFile.Length > 0)
                     {
@@ -148,24 +177,90 @@ namespace Biblioteca.Controllers
                     _context.Update(libro);
                     await _context.SaveChangesAsync();
                     TempData["Success"] = "Libro actualizado exitosamente";
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!LibroExists(libro.LibroId))
                 {
-                    if (!LibroExists(libro.LibroId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
-                return RedirectToAction(nameof(Index));
+                else
+                {
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al actualizar el libro: {ex.Message}";
             }
 
-            ViewData["AutorId"] = new SelectList(_context.Autores, "AutorId", "Nombre", libro.AutorId);
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "CategoriaId", "Nombre", libro.CategoriaId);
+            ViewData["AutorId"] = new SelectList(await _context.Autores.ToListAsync(), "AutorId", "Nombre", libro.AutorId);
+            ViewData["CategoriaId"] = new SelectList(await _context.Categorias.ToListAsync(), "CategoriaId", "Nombre", libro.CategoriaId);
             return View(libro);
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var libro = await _context.Libros
+                .Include(l => l.Autor)
+                .Include(l => l.Categoria)
+                .Include(l => l.Prestamos)
+                .FirstOrDefaultAsync(m => m.LibroId == id);
+
+            if (libro == null)
+            {
+                return NotFound();
+            }
+
+            return View(libro);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                var libro = await _context.Libros
+                    .Include(l => l.Prestamos)
+                    .FirstOrDefaultAsync(l => l.LibroId == id);
+
+                if (libro != null)
+                {
+                    var prestamosActivos = libro.Prestamos.Where(p => p.Estado == "Activo").ToList();
+                    if (prestamosActivos.Any())
+                    {
+                        TempData["Error"] = $"No se puede eliminar el libro porque tiene {prestamosActivos.Count} préstamos activos";
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    if (!string.IsNullOrEmpty(libro.ImagenPortada))
+                    {
+                        string imagePath = Path.Combine(_webHostEnvironment.WebRootPath, libro.ImagenPortada.TrimStart('/'));
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            System.IO.File.Delete(imagePath);
+                        }
+                    }
+
+                    _context.Libros.Remove(libro);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Libro eliminado exitosamente";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al eliminar el libro: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -210,7 +305,7 @@ namespace Biblioteca.Controllers
                                 var autor = await _context.Autores.FirstOrDefaultAsync(a => a.Nombre == autorNombre);
                                 if (autor == null)
                                 {
-                                    autor = new Autor { Nombre = autorNombre };
+                                    autor = new Autor { Nombre = autorNombre ?? "Autor Desconocido" };
                                     _context.Autores.Add(autor);
                                     await _context.SaveChangesAsync();
                                 }
@@ -218,7 +313,7 @@ namespace Biblioteca.Controllers
                                 var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.Nombre == categoriaNombre);
                                 if (categoria == null)
                                 {
-                                    categoria = new Categoria { Nombre = categoriaNombre };
+                                    categoria = new Categoria { Nombre = categoriaNombre ?? "Sin Categoría" };
                                     _context.Categorias.Add(categoria);
                                     await _context.SaveChangesAsync();
                                 }

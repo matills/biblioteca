@@ -1,0 +1,306 @@
+@model Biblioteca.Models.Prestamo
+
+@{
+    ViewData["Title"] = "Detalles del Préstamo";
+    var diasTranscurridos = (DateTime.Now - Model.FechaPrestamo).Days;
+    var diasParaVencimiento = (Model.FechaDevolucionEsperada - DateTime.Now).Days;
+    var estaVencido = Model.Estado == "Activo" && Model.FechaDevolucionEsperada < DateTime.Now;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-info-circle"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3"><i class="fas fa-user"></i> Información del Usuario</h5>
+                            <div class="mb-2">
+                                <strong>Nombre:</strong> @Html.DisplayFor(model => model.Usuario.Nombre)
+                            </div>
+                            <div class="mb-2">
+                                <strong>Email:</strong> @Html.DisplayFor(model => model.Usuario.Email)
+                            </div>
+                            <div class="mb-2">
+                                <strong>Teléfono:</strong> @Html.DisplayFor(model => model.Usuario.Telefono)
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.Usuario.Direccion))
+                            {
+                                <div class="mb-2">
+                                    <strong>Dirección:</strong> @Html.DisplayFor(model => model.Usuario.Direccion)
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3"><i class="fas fa-book"></i> Información del Libro</h5>
+                            <div class="mb-2">
+                                <strong>Título:</strong> @Html.DisplayFor(model => model.Libro.Titulo)
+                            </div>
+                            <div class="mb-2">
+                                <strong>Autor:</strong> @Html.DisplayFor(model => model.Libro.Autor.Nombre)
+                            </div>
+                            <div class="mb-2">
+                                <strong>ISBN:</strong> @Html.DisplayFor(model => model.Libro.ISBN)
+                            </div>
+                            <div class="mb-2">
+                                <strong>Categoría:</strong> 
+                                <span class="badge bg-info">@Html.DisplayFor(model => model.Libro.Categoria.Nombre)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="text-primary mb-3"><i class="fas fa-calendar"></i> Información del Préstamo</h5>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Fecha de Préstamo</h6>
+                                    <p class="card-text fw-bold">@Model.FechaPrestamo.ToString("dd/MM/yyyy")</p>
+                                    <small class="text-muted">Hace @diasTranscurridos días</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Fecha de Devolución</h6>
+                                    <p class="card-text fw-bold">@Model.FechaDevolucionEsperada.ToString("dd/MM/yyyy")</p>
+                                    @if (Model.Estado == "Activo")
+                                    {
+                                        @if (diasParaVencimiento > 0)
+                                        {
+                                            <small class="text-success">En @diasParaVencimiento días</small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-danger">Vencido hace @Math.Abs(diasParaVencimiento) días</small>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Estado</h6>
+                                    @if (Model.Estado == "Activo")
+                                    {
+                                        @if (estaVencido)
+                                        {
+                                            <span class="badge bg-warning fs-6">Vencido</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success fs-6">@Model.Estado</span>
+                                        }
+                                    }
+                                    else if (Model.Estado == "Devuelto")
+                                    {
+                                        <span class="badge bg-info fs-6">@Model.Estado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning fs-6">@Model.Estado</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            @if (Model.FechaDevolucionReal.HasValue)
+                            {
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Fecha Real de Devolución</h6>
+                                        <p class="card-text fw-bold text-success">@Model.FechaDevolucionReal.Value.ToString("dd/MM/yyyy")</p>
+                                        @{
+                                            var diasDiferencia = (Model.FechaDevolucionReal.Value - Model.FechaDevolucionEsperada).Days;
+                                        }
+                                        @if (diasDiferencia > 0)
+                                        {
+                                            <small class="text-warning">@diasDiferencia días tarde</small>
+                                        }
+                                        else if (diasDiferencia < 0)
+                                        {
+                                            <small class="text-success">@Math.Abs(diasDiferencia) días antes</small>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-success">A tiempo</small>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Duración</h6>
+                                        <p class="card-text fw-bold">@diasTranscurridos días</p>
+                                        <small class="text-muted">En préstamo</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Observaciones))
+                    {
+                        <div class="mt-4">
+                            <h6 class="text-primary"><i class="fas fa-sticky-note"></i> Observaciones</h6>
+                            <div class="alert alert-light">
+                                @Html.DisplayFor(model => model.Observaciones)
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cogs"></i> Acciones</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        @if (Model.Estado == "Activo" || Model.Estado == "Vencido")
+                        {
+                            <button type="button" class="btn btn-success" onclick="devolverPrestamo(@Model.PrestamoId)">
+                                <i class="fas fa-undo"></i> Devolver Libro
+                            </button>
+                            <button type="button" class="btn btn-warning" onclick="renovarPrestamo(@Model.PrestamoId)">
+                                <i class="fas fa-sync"></i> Renovar Préstamo
+                            </button>
+                        }
+                        <a asp-action="Edit" asp-route-id="@Model.PrestamoId" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        @if (Model.Estado != "Activo")
+                        {
+                            <a asp-action="Delete" asp-route-id="@Model.PrestamoId" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </a>
+                        }
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver a la Lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Libro.ImagenPortada != null)
+            {
+                <div class="card shadow mt-3">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0"><i class="fas fa-image"></i> Portada del Libro</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="@Model.Libro.ImagenPortada" alt="Portada" class="img-fluid rounded" style="max-height: 300px;">
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="devolverModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formDevolver" method="post">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Devolver Préstamo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Observaciones (opcional):</label>
+                        <textarea name="observaciones" class="form-control" rows="3" 
+                                  placeholder="Ingrese observaciones sobre la devolución..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Devolución</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+    }
+    
+    .btn-info {
+        background: linear-gradient(45deg, #17a2b8, #007bff);
+        border: none;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
+        border: none;
+        color: white;
+    }
+    
+    .btn-success:hover, .btn-info:hover, .btn-warning:hover, .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+    
+    .modal-content {
+        border: none;
+        border-radius: 15px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function devolverPrestamo(id) {
+            document.getElementById('formDevolver').action = '@Url.Action("Devolver")/' + id;
+            new bootstrap.Modal(document.getElementById('devolverModal')).show();
+        }
+
+        function renovarPrestamo(id) {
+            if (confirm('¿Está seguro de renovar este préstamo por 15 días más?')) {
+                fetch('@Url.Action("RenovarPrestamo")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                });
+            }
+        }
+    </script>
+}

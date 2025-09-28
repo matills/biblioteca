@@ -1,0 +1,152 @@
+@model Biblioteca.Models.Prestamo
+
+@{
+    ViewData["Title"] = "Eliminar Préstamo";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-trash"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle"></i> ¿Está seguro de que desea eliminar este préstamo?</h5>
+                        <p class="mb-0">Esta acción no se puede deshacer.</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3"><i class="fas fa-user"></i> Usuario</h6>
+                            <div class="mb-2">
+                                <strong>Nombre:</strong> @Html.DisplayFor(model => model.Usuario.Nombre)
+                            </div>
+                            <div class="mb-2">
+                                <strong>Email:</strong> @Html.DisplayFor(model => model.Usuario.Email)
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3"><i class="fas fa-book"></i> Libro</h6>
+                            <div class="mb-2">
+                                <strong>Título:</strong> @Html.DisplayFor(model => model.Libro.Titulo)
+                            </div>
+                            <div class="mb-2">
+                                <strong>Autor:</strong> @Html.DisplayFor(model => model.Libro.Autor.Nombre)
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6>Fecha de Préstamo</h6>
+                                <p class="fw-bold">@Model.FechaPrestamo.ToString("dd/MM/yyyy")</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6>Fecha de Devolución</h6>
+                                <p class="fw-bold">@Model.FechaDevolucionEsperada.ToString("dd/MM/yyyy")</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h6>Estado</h6>
+                                @if (Model.Estado == "Activo")
+                                {
+                                    <span class="badge bg-success fs-6">@Model.Estado</span>
+                                }
+                                else if (Model.Estado == "Devuelto")
+                                {
+                                    <span class="badge bg-info fs-6">@Model.Estado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning fs-6">@Model.Estado</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            @if (Model.FechaDevolucionReal.HasValue)
+                            {
+                                <div class="text-center">
+                                    <h6>Fecha Real de Devolución</h6>
+                                    <p class="fw-bold text-success">@Model.FechaDevolucionReal.Value.ToString("dd/MM/yyyy")</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Observaciones))
+                    {
+                        <div class="mt-3">
+                            <h6 class="text-primary"><i class="fas fa-sticky-note"></i> Observaciones</h6>
+                            <div class="alert alert-light">
+                                @Html.DisplayFor(model => model.Observaciones)
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Estado == "Activo")
+                    {
+                        <div class="alert alert-danger mt-3">
+                            <h6><i class="fas fa-ban"></i> No se puede eliminar</h6>
+                            <p class="mb-0">Este préstamo está activo. Debe ser devuelto antes de poder eliminarlo.</p>
+                        </div>
+                    }
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" asp-for="PrestamoId" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                            @if (Model.Estado != "Activo")
+                            {
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Está completamente seguro de eliminar este préstamo?')">
+                                    <i class="fas fa-trash"></i> Confirmar Eliminación
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-danger" disabled>
+                                    <i class="fas fa-ban"></i> No se puede eliminar
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-danger {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        border: none;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(45deg, #6c757d, #495057);
+        border: none;
+    }
+    
+    .btn-danger:hover, .btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+</style>

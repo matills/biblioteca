@@ -1,0 +1,151 @@
+@model Biblioteca.Models.Autor
+
+@{
+    ViewData["Title"] = "Eliminar Autor";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-times"></i> @ViewData["Title"]</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle"></i> ¿Está seguro de que desea eliminar este autor?</h5>
+                        <p class="mb-0">Esta acción no se puede deshacer y eliminará toda la información del autor.</p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3"><i class="fas fa-user"></i> Información del Autor</h6>
+                            <div class="mb-2">
+                                <strong>Nombre:</strong> @Html.DisplayFor(model => model.Nombre)
+                            </div>
+                            @if (Model.FechaNacimiento.HasValue)
+                            {
+                                <div class="mb-2">
+                                    <strong>Fecha de Nacimiento:</strong> @Model.FechaNacimiento.Value.ToString("dd/MM/yyyy")
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Pais))
+                            {
+                                <div class="mb-2">
+                                    <strong>País:</strong> @Html.DisplayFor(model => model.Pais)
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.Biografia))
+                            {
+                                <div class="mb-2">
+                                    <strong>Biografía:</strong>
+                                    <div class="mt-1 p-2 bg-light rounded small">
+                                        @(Model.Biografia.Length > 100 ? Model.Biografia.Substring(0, 100) + "..." : Model.Biografia)
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3"><i class="fas fa-chart-bar"></i> Estadísticas de Libros</h6>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="card bg-primary text-white text-center">
+                                        <div class="card-body py-2">
+                                            <h5>@Model.Libros.Count</h5>
+                                            <small>Libros</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="card bg-success text-white text-center">
+                                        <div class="card-body py-2">
+                                            <h5>@Model.Libros.Sum(l => l.CantidadDisponible)</h5>
+                                            <small>Ejemplares</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Model.Libros.Any())
+                    {
+                        <div class="alert alert-danger mt-4">
+                            <h6><i class="fas fa-ban"></i> No se puede eliminar este autor</h6>
+                            <p>El autor tiene <strong>@Model.Libros.Count libro(s)</strong> registrado(s). Debe eliminar o reasignar todos los libros antes de poder eliminar el autor.</p>
+                            
+                            <h6 class="mt-3">Libros registrados:</h6>
+                            <ul class="mb-0">
+                                @foreach (var libro in Model.Libros.Take(5))
+                                {
+                                    <li>
+                                        <strong>@libro.Titulo</strong> (@libro.AnoPublicacion)
+                                        - <span class="badge bg-info">@libro.CantidadDisponible ejemplares</span>
+                                    </li>
+                                }
+                                @if (Model.Libros.Count > 5)
+                                {
+                                    <li class="text-muted">Y @(Model.Libros.Count - 5) libro(s) más...</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success mt-4">
+                            <h6><i class="fas fa-check-circle"></i> Autor sin libros</h6>
+                            <p class="mb-0">Este autor no tiene libros registrados y puede ser eliminado sin problemas.</p>
+                        </div>
+                    }
+
+                    <form asp-action="Delete" method="post" class="mt-4">
+                        <input type="hidden" asp-for="AutorId" />
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver
+                            </a>
+                            @if (!Model.Libros.Any())
+                            {
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Está completamente seguro de eliminar este autor?')">
+                                    <i class="fas fa-trash"></i> Confirmar Eliminación
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-danger" disabled>
+                                    <i class="fas fa-ban"></i> No se puede eliminar
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-danger {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        border: none;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(45deg, #6c757d, #495057);
+        border: none;
+    }
+    
+    .btn-danger:hover, .btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+    }
+</style>

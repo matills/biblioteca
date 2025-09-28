@@ -1,0 +1,347 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Reporte de Usuarios";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary"><i class="fas fa-chart-line"></i> @ViewData["Title"]</h2>
+                <div class="btn-group">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver a Usuarios
+                    </a>
+                    <button type="button" class="btn btn-success" onclick="exportarExcel()">
+                        <i class="fas fa-file-excel"></i> Exportar Excel
+                    </button>
+                    <button type="button" class="btn btn-info" onclick="window.print()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h4>@Model.Count()</h4>
+                            <p class="mb-0">Total Usuarios</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h4>@Model.Count(u => u.PrestamosActivos > 0)</h4>
+                            <p class="mb-0">Con Préstamos Activos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h4>@Model.Count(u => u.PrestamosVencidos > 0)</h4>
+                            <p class="mb-0">Con Préstamos Vencidos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h4>@Model.Sum(u => (int)u.TotalPrestamos)</h4>
+                            <p class="mb-0">Total Préstamos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="text" id="filtroNombre" class="form-control" placeholder="Buscar por nombre...">
+                        </div>
+                        <div class="col-md-3">
+                            <select id="filtroActividad" class="form-select">
+                                <option value="">Todos los usuarios</option>
+                                <option value="activos">Con préstamos activos</option>
+                                <option value="vencidos">Con préstamos vencidos</option>
+                                <option value="sinactividad">Sin actividad</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="ordenarPor" class="form-select">
+                                <option value="prestamos">Ordenar por total préstamos</option>
+                                <option value="nombre">Ordenar por nombre</option>
+                                <option value="fecha">Ordenar por fecha registro</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" onclick="limpiarFiltros()">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped" id="tablaReporte">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>Fecha Registro</th>
+                                    <th class="text-center">Total Préstamos</th>
+                                    <th class="text-center">Activos</th>
+                                    <th class="text-center">Vencidos</th>
+                                    <th class="text-center">Último Préstamo</th>
+                                    <th class="text-center">Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{int contador = 1;}
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@contador</td>
+                                        <td>
+                                            <strong>@item.Usuario.Nombre</strong><br>
+                                            <small class="text-muted">@item.Usuario.Telefono</small>
+                                        </td>
+                                        <td>@item.Usuario.Email</td>
+                                        <td>@item.Usuario.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary fs-6">@item.TotalPrestamos</span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.PrestamosActivos > 0)
+                                            {
+                                                <span class="badge bg-success fs-6">@item.PrestamosActivos</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary fs-6">0</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.PrestamosVencidos > 0)
+                                            {
+                                                <span class="badge bg-warning fs-6">@item.PrestamosVencidos</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary fs-6">0</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.UltimoPrestamo != null)
+                                            {
+                                                <small>@((DateTime)item.UltimoPrestamo).ToString("dd/MM/yyyy")</small>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted">Nunca</small>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.PrestamosVencidos > 0)
+                                            {
+                                                <span class="badge bg-danger">Moroso</span>
+                                            }
+                                            else if (item.PrestamosActivos > 0)
+                                            {
+                                                <span class="badge bg-success">Activo</span>
+                                            }
+                                            else if (item.TotalPrestamos > 0)
+                                            {
+                                                <span class="badge bg-info">Regular</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Nuevo</span>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="Details" asp-route-id="@item.Usuario.UsuarioId" 
+                                                   class="btn btn-info btn-sm" title="Ver Detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a asp-controller="Prestamos" asp-action="Create" 
+                                                   class="btn btn-success btn-sm" title="Nuevo Préstamo">
+                                                    <i class="fas fa-plus"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    contador++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+    }
+    
+    .btn-info {
+        background: linear-gradient(45deg, #17a2b8, #007bff);
+        border: none;
+    }
+    
+    .btn-secondary {
+        background: linear-gradient(45deg, #6c757d, #495057);
+        border: none;
+    }
+    
+    .btn-success:hover, .btn-info:hover, .btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .card {
+        border: none;
+        border-radius: 15px;
+    }
+    
+    .table th {
+        background: linear-gradient(45deg, #343a40, #495057) !important;
+        border: none;
+    }
+    
+    .btn-group .btn {
+        margin: 0 1px;
+    }
+    
+    @@media print {
+        .btn-group, .card-body .row {
+            display: none !important;
+        }
+        
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.getElementById('filtroNombre').addEventListener('keyup', filtrarTabla);
+        document.getElementById('filtroActividad').addEventListener('change', filtrarTabla);
+        document.getElementById('ordenarPor').addEventListener('change', ordenarTabla);
+
+        function filtrarTabla() {
+            const filtroNombre = document.getElementById('filtroNombre').value.toLowerCase();
+            const filtroActividad = document.getElementById('filtroActividad').value;
+            
+            const filas = document.querySelectorAll('#tablaReporte tbody tr');
+            
+            filas.forEach(fila => {
+                const nombre = fila.cells[1].textContent.toLowerCase();
+                const prestamosActivos = parseInt(fila.cells[5].textContent.trim()) || 0;
+                const prestamosVencidos = parseInt(fila.cells[6].textContent.trim()) || 0;
+                const totalPrestamos = parseInt(fila.cells[4].textContent.trim()) || 0;
+                
+                let mostrar = true;
+                
+                if (filtroNombre && !nombre.includes(filtroNombre)) {
+                    mostrar = false;
+                }
+                
+                if (filtroActividad === 'activos' && prestamosActivos === 0) {
+                    mostrar = false;
+                }
+                
+                if (filtroActividad === 'vencidos' && prestamosVencidos === 0) {
+                    mostrar = false;
+                }
+                
+                if (filtroActividad === 'sinactividad' && totalPrestamos > 0) {
+                    mostrar = false;
+                }
+                
+                fila.style.display = mostrar ? '' : 'none';
+            });
+        }
+        
+        function ordenarTabla() {
+            const criterio = document.getElementById('ordenarPor').value;
+            const tbody = document.querySelector('#tablaReporte tbody');
+            const filas = Array.from(tbody.querySelectorAll('tr'));
+            
+            filas.sort((a, b) => {
+                let valorA, valorB;
+                
+                switch (criterio) {
+                    case 'nombre':
+                        valorA = a.cells[1].textContent.toLowerCase();
+                        valorB = b.cells[1].textContent.toLowerCase();
+                        return valorA.localeCompare(valorB);
+                    
+                    case 'fecha':
+                        valorA = new Date(a.cells[3].textContent.split('/').reverse().join('-'));
+                        valorB = new Date(b.cells[3].textContent.split('/').reverse().join('-'));
+                        return valorB - valorA;
+                    
+                    case 'prestamos':
+                    default:
+                        valorA = parseInt(a.cells[4].textContent.trim()) || 0;
+                        valorB = parseInt(b.cells[4].textContent.trim()) || 0;
+                        return valorB - valorA;
+                }
+            });
+            
+            filas.forEach((fila, index) => {
+                fila.cells[0].textContent = index + 1;
+                tbody.appendChild(fila);
+            });
+        }
+        
+        function limpiarFiltros() {
+            document.getElementById('filtroNombre').value = '';
+            document.getElementById('filtroActividad').value = '';
+            document.getElementById('ordenarPor').value = 'prestamos';
+            filtrarTabla();
+            ordenarTabla();
+        }
+        
+        function exportarExcel() {
+            const tabla = document.getElementById('tablaReporte');
+            const filas = tabla.querySelectorAll('tr:not([style*="display: none"])');
+            
+            let csv = '';
+            filas.forEach(fila => {
+                const celdas = fila.querySelectorAll('th, td');
+                const fila_csv = Array.from(celdas).slice(0, -1).map(celda => 
+                    '"' + celda.textContent.replace(/"/g, '""').trim() + '"'
+                ).join(',');
+                csv += fila_csv + '\n';
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'reporte_usuarios_' + new Date().toISOString().split('T')[0] + '.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+}

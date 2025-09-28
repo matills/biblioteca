@@ -3,6 +3,7 @@ using Biblioteca.Models;
 using Biblioteca.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+using OfficeOpenXml;
 
 namespace Biblioteca.Services
 {
@@ -157,6 +158,112 @@ namespace Biblioteca.Services
                 .Where(p => p.Estado == "Activo" && p.FechaDevolucionEsperada < DateTime.Now)
                 .OrderBy(p => p.FechaDevolucionEsperada)
                 .ToListAsync();
+        }
+
+        public async Task<byte[]> GenerarReporteExcelAsync()
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            using var package = new ExcelPackage();
+            
+            var wsEstadisticas = package.Workbook.Worksheets.Add("Estadísticas Generales");
+            
+            var totalLibros = await GetTotalLibrosAsync();
+            var totalUsuarios = await GetTotalUsuariosAsync();
+            var prestamosActivos = await GetPrestamosActivosAsync();
+            var prestamosVencidos = await GetPrestamosVencidosCountAsync();
+
+            wsEstadisticas.Cells[1, 1].Value = "REPORTE ESTADÍSTICAS BIBLIOTECA";
+            wsEstadisticas.Cells[1, 1].Style.Font.Bold = true;
+            wsEstadisticas.Cells[1, 1].Style.Font.Size = 16;
+            
+            wsEstadisticas.Cells[2, 1].Value = $"Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}";
+            
+            wsEstadisticas.Cells[4, 1].Value = "Estadística";
+            wsEstadisticas.Cells[4, 2].Value = "Valor";
+            wsEstadisticas.Cells[4, 1, 4, 2].Style.Font.Bold = true;
+            
+            wsEstadisticas.Cells[5, 1].Value = "Total de Libros";
+            wsEstadisticas.Cells[5, 2].Value = totalLibros;
+            wsEstadisticas.Cells[6, 1].Value = "Total de Usuarios";
+            wsEstadisticas.Cells[6, 2].Value = totalUsuarios;
+            wsEstadisticas.Cells[7, 1].Value = "Préstamos Activos";
+            wsEstadisticas.Cells[7, 2].Value = prestamosActivos;
+            wsEstadisticas.Cells[8, 1].Value = "Préstamos Vencidos";
+            wsEstadisticas.Cells[8, 2].Value = prestamosVencidos;
+
+            var wsLibros = package.Workbook.Worksheets.Add("Libros Más Prestados");
+            var librosMasPrestados = await GetLibrosMasPrestadosAsync(10);
+            
+            wsLibros.Cells[1, 1].Value = "Posición";
+            wsLibros.Cells[1, 2].Value = "Título";
+            wsLibros.Cells[1, 3].Value = "Autor";
+            wsLibros.Cells[1, 4].Value = "Categoría";
+            wsLibros.Cells[1, 5].Value = "Total Préstamos";
+            wsLibros.Cells[1, 1, 1, 5].Style.Font.Bold = true;
+
+            for (int i = 0; i < librosMasPrestados.Count; i++)
+            {
+                var libro = librosMasPrestados[i];
+                var totalPrestamos = await _context.Prestamos.CountAsync(p => p.LibroId == libro.LibroId);
+                
+                wsLibros.Cells[i + 2, 1].Value = i + 1;
+                wsLibros.Cells[i + 2, 2].Value = libro.Titulo;
+                wsLibros.Cells[i + 2, 3].Value = libro.Autor?.Nombre ?? "Sin autor";
+                wsLibros.Cells[i + 2, 4].Value = libro.Categoria?.Nombre ?? "Sin categoría";
+                wsLibros.Cells[i + 2, 5].Value = totalPrestamos;
+            }
+
+            var wsUsuarios = package.Workbook.Worksheets.Add("Usuarios Más Activos");
+            var usuariosMasActivos = await GetUsuariosMasActivosAsync(10);
+            
+            wsUsuarios.Cells[1, 1].Value = "Posición";
+            wsUsuarios.Cells[1, 2].Value = "Nombre";
+            wsUsuarios.Cells[1, 3].Value = "Email";
+            wsUsuarios.Cells[1, 4].Value = "Total Préstamos";
+            wsUsuarios.Cells[1, 1, 1, 4].Style.Font.Bold = true;
+
+            for (int i = 0; i < usuariosMasActivos.Count; i++)
+            {
+                var usuario = usuariosMasActivos[i];
+                var totalPrestamos = await _context.Prestamos.CountAsync(p => p.UsuarioId == usuario.UsuarioId);
+                
+                wsUsuarios.Cells[i + 2, 1].Value = i + 1;
+                wsUsuarios.Cells[i + 2, 2].Value = usuario.Nombre;
+                wsUsuarios.Cells[i + 2, 3].Value = usuario.Email;
+                wsUsuarios.Cells[i + 2, 4].Value = totalPrestamos;
+            }
+
+            var wsPrestamosVencidos = package.Workbook.Worksheets.Add("Préstamos Vencidos");
+            var prestamosVencidosList = await GetPrestamosVencidosListAsync();
+            
+            wsPrestamosVencidos.Cells[1, 1].Value = "Usuario";
+            wsPrestamosVencidos.Cells[1, 2].Value = "Libro";
+            wsPrestamosVencidos.Cells[1, 3].Value = "Autor";
+            wsPrestamosVencidos.Cells[1, 4].Value = "Fecha Préstamo";
+            wsPrestamosVencidos.Cells[1, 5].Value = "Fecha Vencimiento";
+            wsPrestamosVencidos.Cells[1, 6].Value = "Días Vencido";
+            wsPrestamosVencidos.Cells[1, 1, 1, 6].Style.Font.Bold = true;
+
+            for (int i = 0; i < prestamosVencidosList.Count; i++)
+            {
+                var prestamo = prestamosVencidosList[i];
+                var diasVencido = (DateTime.Now - prestamo.FechaDevolucionEsperada).Days;
+                
+                wsPrestamosVencidos.Cells[i + 2, 1].Value = prestamo.Usuario?.Nombre ?? "Sin usuario";
+                wsPrestamosVencidos.Cells[i + 2, 2].Value = prestamo.Libro?.Titulo ?? "Sin libro";
+                wsPrestamosVencidos.Cells[i + 2, 3].Value = prestamo.Libro?.Autor?.Nombre ?? "Sin autor";
+                wsPrestamosVencidos.Cells[i + 2, 4].Value = prestamo.FechaPrestamo.ToString("dd/MM/yyyy");
+                wsPrestamosVencidos.Cells[i + 2, 5].Value = prestamo.FechaDevolucionEsperada.ToString("dd/MM/yyyy");
+                wsPrestamosVencidos.Cells[i + 2, 6].Value = diasVencido;
+            }
+
+            foreach (var worksheet in package.Workbook.Worksheets)
+            {
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+            }
+
+            return package.GetAsByteArray();
         }
     }
 }
