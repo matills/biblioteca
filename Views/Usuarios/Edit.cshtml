@@ -142,7 +142,6 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
-        // Validación de email en tiempo real
         document.getElementById('Email').addEventListener('blur', function() {
             const email = this.value;
             const usuarioId = @Model.UsuarioId;
@@ -172,9 +171,8 @@
                 });
         });
         
-        // Formatear teléfono
         document.getElementById('Telefono').addEventListener('input', function() {
-            let value = this.value.replace(/\D/g, ''); // Remover caracteres no numéricos
+            let value = this.value.replace(/\D/g, '');
             
             if (value.length > 0) {
                 if (value.length <= 2) {

@@ -64,7 +64,6 @@ namespace Biblioteca.Controllers
         {
             try
             {
-                // Verificar si el ISBN ya existe
                 if (!string.IsNullOrEmpty(libro.ISBN) && await _context.Libros.AnyAsync(l => l.ISBN == libro.ISBN))
                 {
                     ModelState.AddModelError("ISBN", "Ya existe un libro con este ISBN");
@@ -72,27 +71,47 @@ namespace Biblioteca.Controllers
 
                 if (ModelState.IsValid)
                 {
-                    // Procesar imagen si se subió una
                     if (imagenFile != null && imagenFile.Length > 0)
                     {
                         try
                         {
+                            if (imagenFile.Length > 1 * 1024 * 1024) // 1MB máximo
+                            {
+                                ModelState.AddModelError("imagenFile", "La imagen es demasiado grande. Máximo 1MB.");
+                                await CargarDatosCreate();
+                                return View(libro);
+                            }
+
+                            var allowedTypes = new[] { "image/jpeg", "image/png" };
+                            if (!allowedTypes.Contains(imagenFile.ContentType.ToLower()))
+                            {
+                                ModelState.AddModelError("imagenFile", "Solo se permiten archivos JPG y PNG.");
+                                await CargarDatosCreate();
+                                return View(libro);
+                            }
+
                             string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "libros");
-                            Directory.CreateDirectory(uploadsFolder);
                             
-                            string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imagenFile.FileName);
+                            if (!Directory.Exists(uploadsFolder))
+                            {
+                                Directory.CreateDirectory(uploadsFolder);
+                            }
+                            
+                            string uniqueFileName = Guid.NewGuid().ToString() + ".jpg";
                             string filePath = Path.Combine(uploadsFolder, uniqueFileName);
                             
-                            using (var fileStream = new FileStream(filePath, FileMode.Create))
+                            using (var stream = new FileStream(filePath, FileMode.Create))
                             {
-                                await imagenFile.CopyToAsync(fileStream);
+                                await imagenFile.CopyToAsync(stream);
                             }
                             
                             libro.ImagenPortada = "/images/libros/" + uniqueFileName;
                         }
                         catch (Exception ex)
                         {
-                            TempData["Warning"] = $"El libro se guardó pero hubo un error con la imagen: {ex.Message}";
+                            ModelState.AddModelError("imagenFile", "Error al procesar la imagen. Intente con una imagen más pequeña.");
+                            await CargarDatosCreate();
+                            return View(libro);
                         }
                     }
 
@@ -369,6 +388,12 @@ namespace Biblioteca.Controllers
         private bool LibroExists(int id)
         {
             return _context.Libros.Any(e => e.LibroId == id);
+        }
+
+        private async Task CargarDatosCreate()
+        {
+            ViewData["AutorId"] = new SelectList(await _context.Autores.ToListAsync(), "AutorId", "Nombre");
+            ViewData["CategoriaId"] = new SelectList(await _context.Categorias.ToListAsync(), "CategoriaId", "Nombre");
         }
 
         public ActionResult BuscarLibrosPorCategoria(int categoriaId)

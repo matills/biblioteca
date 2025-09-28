@@ -83,13 +83,15 @@ namespace Biblioteca.Controllers
             var librosDisponibles = await _context.Libros
                 .Include(l => l.Autor)
                 .Where(l => l.CantidadDisponible > 0)
-                .Select(l => new {
-                    LibroId = l.LibroId,
-                    Display = $"{l.Titulo} - {l.Autor.Nombre} (Disponibles: {l.CantidadDisponible})"
-                })
                 .ToListAsync();
 
-            ViewData["LibroId"] = new SelectList(librosDisponibles, "LibroId", "Display");
+            var librosSelectList = librosDisponibles.Select(l => new SelectListItem
+            {
+                Value = l.LibroId.ToString(),
+                Text = $"{l.Titulo} - {l.Autor.Nombre} (Disponibles: {l.CantidadDisponible})"
+            }).ToList();
+
+            ViewData["LibroId"] = new SelectList(librosSelectList, "Value", "Text");
             ViewData["UsuarioId"] = new SelectList(await _context.Usuarios.ToListAsync(), "UsuarioId", "Nombre");
             
             return View();
@@ -97,8 +99,9 @@ namespace Biblioteca.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PrestamoId,FechaPrestamo,FechaDevolucionEsperada,Observaciones,UsuarioId,LibroId")] Prestamo prestamo)
+        public async Task<IActionResult> Create([Bind("PrestamoId,FechaPrestamo,FechaDevolucionEsperada,Observaciones,UsuarioId,LibroId,Estado")] Prestamo prestamo)
         {
+            
             if (ModelState.IsValid)
             {
                 var libro = await _context.Libros.FindAsync(prestamo.LibroId);
@@ -281,13 +284,15 @@ namespace Biblioteca.Controllers
             var librosDisponibles = await _context.Libros
                 .Include(l => l.Autor)
                 .Where(l => l.CantidadDisponible > 0)
-                .Select(l => new {
-                    LibroId = l.LibroId,
-                    Display = $"{l.Titulo} - {l.Autor.Nombre} (Disponibles: {l.CantidadDisponible})"
-                })
                 .ToListAsync();
 
-            ViewData["LibroId"] = new SelectList(librosDisponibles, "LibroId", "Display");
+            var librosSelectList = librosDisponibles.Select(l => new SelectListItem
+            {
+                Value = l.LibroId.ToString(),
+                Text = $"{l.Titulo} - {l.Autor.Nombre} (Disponibles: {l.CantidadDisponible})"
+            }).ToList();
+
+            ViewData["LibroId"] = new SelectList(librosSelectList, "Value", "Text");
             ViewData["UsuarioId"] = new SelectList(await _context.Usuarios.ToListAsync(), "UsuarioId", "Nombre");
         }
 

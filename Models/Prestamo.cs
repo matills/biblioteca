@@ -38,9 +38,9 @@ namespace Biblioteca.Models
         public int LibroId { get; set; }
 
         [ForeignKey("UsuarioId")]
-        public virtual Usuario Usuario { get; set; }
+        public virtual Usuario? Usuario { get; set; }
         
         [ForeignKey("LibroId")]
-        public virtual Libro Libro { get; set; }
+        public virtual Libro? Libro { get; set; }
     }
 }

@@ -13,7 +13,7 @@
                 </div>
                 <div class="card-body">
                     <form asp-action="Create" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                         <div class="row">
                             <div class="col-md-6">
@@ -134,7 +134,7 @@
             
             infoDiv.innerHTML = '<span class="text-info"><i class="fas fa-spinner fa-spin"></i> Verificando disponibilidad...</span>';
             
-            fetch('/Libros/VerificarDisponibilidad?libroId=' + libroId)
+            fetch('/Prestamos/VerificarDisponibilidadLibro?libroId=' + libroId)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Error en la respuesta del servidor');
@@ -149,7 +149,6 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error al verificar disponibilidad:', error);
                     infoDiv.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Error al verificar disponibilidad</span>';
                 });
         }

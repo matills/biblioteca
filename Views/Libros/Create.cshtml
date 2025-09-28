@@ -78,8 +78,8 @@
                                 <div class="mb-3">
                                     <label for="imagenFile" class="form-label fw-bold">Imagen de Portada</label>
                                     <input type="file" class="form-control" id="imagenFile" name="imagenFile" 
-                                           accept="image/*" onchange="previewImage(this)">
-                                    <div class="form-text">Formatos soportados: JPG, PNG, GIF. Tamaño máximo: 5MB</div>
+                                           accept="image/jpeg,image/png" onchange="previewImage(this)">
+                                    <div class="form-text">Formatos soportados: JPG, PNG. Tamaño máximo: 1MB</div>
                                 </div>
                                 
                                 <div class="mb-3">
@@ -128,18 +128,18 @@
             const noImagePreview = document.getElementById('noImagePreview');
             
             if (file) {
-                const maxSize = 5 * 1024 * 1024;
+                const maxSize = 1 * 1024 * 1024;
                 if (file.size > maxSize) {
-                    alert('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+                    alert('El archivo es demasiado grande. El tamaño máximo es 1MB.');
                     input.value = '';
                     imagePreview.style.display = 'none';
                     noImagePreview.style.display = 'block';
                     return;
                 }
                 
-                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                const allowedTypes = ['image/jpeg', 'image/png'];
                 if (!allowedTypes.includes(file.type)) {
-                    alert('Tipo de archivo no válido. Solo se permiten JPG, PNG y GIF.');
+                    alert('Tipo de archivo no válido. Solo se permiten JPG y PNG.');
                     input.value = '';
                     imagePreview.style.display = 'none';
                     noImagePreview.style.display = 'block';
