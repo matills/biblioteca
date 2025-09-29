@@ -37,7 +37,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label asp-for="Telefono" class="form-label fw-bold">Teléfono</label>
-                                    <input asp-for="Telefono" class="form-control" placeholder="Ej: +54 11 1234-5678" />
+                                    <input asp-for="Telefono" class="form-control" placeholder="Ej: 11 1234-5678" />
                                     <span asp-validation-for="Telefono" class="text-danger"></span>
                                 </div>
                             </div>
@@ -160,13 +160,13 @@
             
             if (value.length > 0) {
                 if (value.length <= 2) {
-                    value = '+' + value;
+                    value = value;
                 } else if (value.length <= 4) {
-                    value = '+' + value.substring(0, 2) + ' ' + value.substring(2);
+                    value = value.substring(0, 2) + ' ' + value.substring(2);
                 } else if (value.length <= 6) {
-                    value = '+' + value.substring(0, 2) + ' ' + value.substring(2, 4) + ' ' + value.substring(4);
+                    value = value.substring(0, 2) + ' ' + value.substring(2, 4) + ' ' + value.substring(4);
                 } else {
-                    value = '+' + value.substring(0, 2) + ' ' + value.substring(2, 4) + ' ' + value.substring(4, 8) + '-' + value.substring(8, 12);
+                    value = value.substring(0, 2) + ' ' + value.substring(2, 4) + ' ' + value.substring(4, 8) + '-' + value.substring(8, 12);
                 }
             }
             

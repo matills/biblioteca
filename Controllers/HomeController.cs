@@ -60,15 +60,22 @@ namespace Biblioteca.Controllers
         {
             try
             {
+                _logger.LogInformation("Iniciando generación de reporte Excel");
+                
                 var excelBytes = await _bibliotecaService.GenerarReporteExcelAsync();
                 var fileName = $"Reporte_Biblioteca_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                
+                _logger.LogInformation("Reporte Excel generado exitosamente, tamaño: {Size} bytes", excelBytes.Length);
                 
                 return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al generar el reporte Excel");
-                TempData["Error"] = "Error al generar el reporte Excel";
+                _logger.LogError(ex, "Error al generar el reporte Excel: {Message}", ex.Message);
+                
+                var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                TempData["Error"] = $"Error al generar el reporte Excel: {errorMessage}";
+                
                 return RedirectToAction(nameof(Index));
             }
         }

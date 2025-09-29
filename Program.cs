@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Biblioteca.Data;
 using Biblioteca.Services;
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ExcelPackage.License.SetNonCommercialPersonal("Biblioteca System");
 
 builder.Services.AddControllersWithViews();
 

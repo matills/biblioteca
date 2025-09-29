@@ -293,7 +293,6 @@ namespace Biblioteca.Controllers
 
             try
             {
-                OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
                 
                 using (var stream = new MemoryStream())
                 {

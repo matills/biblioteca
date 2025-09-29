@@ -1,19 +1,21 @@
 @model Biblioteca.Models.Libro
 
 @{
-    ViewData["Title"] = "Crear Nuevo Libro";
+    ViewData["Title"] = "Editar Libro";
 }
 
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-10">
             <div class="card shadow">
-                <div class="card-header bg-success text-white">
-                    <h3 class="mb-0"><i class="fas fa-book-medical"></i> @ViewData["Title"]</h3>
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="mb-0"><i class="fas fa-edit"></i> @ViewData["Title"]</h3>
                 </div>
                 <div class="card-body">
-                    <form asp-action="Create" method="post" enctype="multipart/form-data" id="formLibro">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data" id="formLibro">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <input type="hidden" asp-for="LibroId" />
+                        <input type="hidden" asp-for="ImagenPortada" />
                         
                         <div class="row">
                             <div class="col-md-6">
@@ -76,20 +78,30 @@
                             
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="imagenFile" class="form-label fw-bold">Imagen de Portada</label>
+                                    <label for="imagenFile" class="form-label fw-bold">Nueva Imagen de Portada</label>
                                     <input type="file" class="form-control" id="imagenFile" name="imagenFile" 
                                            accept="image/jpeg,image/png" onchange="previewImage(this)">
-                                    <div class="form-text">Formatos soportados: JPG, PNG. Tamaño máximo: 1MB</div>
+                                    <div class="form-text">Formatos soportados: JPG, PNG. Tamaño máximo: 1MB. Dejar vacío para mantener la imagen actual.</div>
                                 </div>
                                 
                                 <div class="mb-3">
                                     <div id="imagePreview" class="text-center" style="display: none;">
                                         <img id="preview" src="#" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 250px;">
-                                        <p class="small text-muted mt-2">Vista previa de la portada</p>
+                                        <p class="small text-muted mt-2">Vista previa de la nueva portada</p>
                                     </div>
-                                    <div id="noImagePreview" class="text-center p-4 bg-light border rounded">
-                                        <i class="fas fa-image fa-3x text-muted mb-2"></i>
-                                        <p class="text-muted mb-0">Seleccione una imagen para ver la vista previa</p>
+                                    <div id="currentImagePreview" class="text-center">
+                                        @if (!string.IsNullOrEmpty(Model.ImagenPortada))
+                                        {
+                                            <img src="@Model.ImagenPortada" alt="Imagen actual" class="img-thumbnail" style="max-width: 200px; max-height: 250px;">
+                                            <p class="small text-muted mt-2">Imagen actual</p>
+                                        }
+                                        else
+                                        {
+                                            <div class="p-4 bg-light border rounded">
+                                                <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                                                <p class="text-muted mb-0">Sin imagen de portada</p>
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                                 
@@ -106,8 +118,8 @@
                             <a asp-action="Index" class="btn btn-secondary btn-lg me-2">
                                 <i class="fas fa-arrow-left"></i> Cancelar
                             </a>
-                            <button type="submit" class="btn btn-success btn-lg" id="btnGuardar">
-                                <i class="fas fa-save"></i> Guardar Libro
+                            <button type="submit" class="btn btn-warning btn-lg" id="btnGuardar">
+                                <i class="fas fa-save"></i> Actualizar Libro
                             </button>
                         </div>
                     </form>
@@ -125,7 +137,7 @@
             const file = input.files[0];
             const preview = document.getElementById('preview');
             const imagePreview = document.getElementById('imagePreview');
-            const noImagePreview = document.getElementById('noImagePreview');
+            const currentImagePreview = document.getElementById('currentImagePreview');
             
             if (file) {
                 const maxSize = 1 * 1024 * 1024;
@@ -133,7 +145,7 @@
                     alert('El archivo es demasiado grande. El tamaño máximo es 1MB.');
                     input.value = '';
                     imagePreview.style.display = 'none';
-                    noImagePreview.style.display = 'block';
+                    currentImagePreview.style.display = 'block';
                     return;
                 }
                 
@@ -142,7 +154,7 @@
                     alert('Tipo de archivo no válido. Solo se permiten JPG y PNG.');
                     input.value = '';
                     imagePreview.style.display = 'none';
-                    noImagePreview.style.display = 'block';
+                    currentImagePreview.style.display = 'block';
                     return;
                 }
                 
@@ -150,12 +162,12 @@
                 reader.onload = function(e) {
                     preview.src = e.target.result;
                     imagePreview.style.display = 'block';
-                    noImagePreview.style.display = 'none';
+                    currentImagePreview.style.display = 'none';
                 }
                 reader.readAsDataURL(file);
             } else {
                 imagePreview.style.display = 'none';
-                noImagePreview.style.display = 'block';
+                currentImagePreview.style.display = 'block';
             }
         }
         
@@ -173,14 +185,7 @@
             
             const btnGuardar = document.getElementById('btnGuardar');
             btnGuardar.disabled = true;
-            btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-        });
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            const anoInput = document.getElementById('AnoPublicacion');
-            if (!anoInput.value) {
-                anoInput.value = new Date().getFullYear();
-            }
+            btnGuardar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
         });
     </script>
 }
@@ -192,43 +197,35 @@
     }
     
     .card-header {
-        background: linear-gradient(45deg, #28a745, #20c997) !important;
+        background: linear-gradient(45deg, #ffc107, #fd7e14) !important;
         border-radius: 15px 15px 0 0 !important;
     }
     
     .form-control:focus, .form-select:focus {
-        border-color: #28a745;
-        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
     }
     
-    .btn-success {
-        background: linear-gradient(45deg, #28a745, #20c997);
+    .btn-warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
         border: none;
+        color: #000;
     }
     
-    .btn-success:hover {
-        background: linear-gradient(45deg, #1e7e34, #17a2b8);
+    .btn-warning:hover {
+        background: linear-gradient(45deg, #e0a800, #dc6502);
         transform: translateY(-1px);
+        color: #000;
     }
     
-    #imagePreview img {
-        border: 3px solid #28a745;
+    #imagePreview img, #currentImagePreview img {
+        border: 3px solid #ffc107;
         border-radius: 10px;
         transition: transform 0.3s ease;
     }
     
-    #imagePreview img:hover {
+    #imagePreview img:hover, #currentImagePreview img:hover {
         transform: scale(1.05);
-    }
-    
-    #noImagePreview {
-        border: 2px dashed #dee2e6 !important;
-        transition: all 0.3s ease;
-    }
-    
-    #noImagePreview:hover {
-        border-color: #28a745 !important;
-        background-color: #f8f9fa !important;
     }
     
     .form-label {
