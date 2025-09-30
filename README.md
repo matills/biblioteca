@@ -72,26 +72,7 @@ dotnet ef database update
 2. Ejecuta el proyecto: `F5` o `Ctrl + F5`
 3. El navegador debería abrir en `https://localhost:xxxx`
 
-## 🗃️ Estructura de la Base de Datos
-
-El sistema creará automáticamente las siguientes tablas:
-
-### Tablas Principales
-
-- **Authors**: Información de autores
-- **Categorias**: Categorías de libros
-- **Libros**: Catálogo de libros con relaciones
-- **Usuarios**: Usuarios registrados en el sistema
-- **Prestamos**: Registro de préstamos y devoluciones
-
-### Relaciones Implementadas
-
-- **Autor → Libros**: One-to-Many (Un autor puede tener muchos libros)
-- **Categoría → Libros**: One-to-Many (Una categoría puede tener muchos libros)
-- **Usuario → Préstamos**: One-to-Many (Un usuario puede tener muchos préstamos)
-- **Libro → Préstamos**: One-to-Many (Un libro puede tener muchos préstamos)
-
-## 🔍 Solución de Problemas Comunes
+## Solución de Problemas Comunes
 
 ### Error de Conexión a Base de Datos
 
