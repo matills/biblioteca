@@ -26,14 +26,13 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h1 class="text-primary mb-0">
-                        <i class="fas fa-tachometer-alt"></i> Dashboard Biblioteca
+                        Tu Biblioteca
                     </h1>
                     <p class="text-muted">Panel de control y estadísticas del sistema</p>
                 </div>
                 <div>
-                    <a asp-action="GenerarReporte" class="btn btn-info btn-lg">
-                        <i class="fas fa-file-download"></i> Generar Reporte
-                    </a>
+                    <a asp-action="GenerarReporte" class="btn btn-lg btn-outline-primary">
+                        <i class="fas fa-file-download"></i> Generar Reporte Excel
                 </div>
             </div>
         </div>
@@ -134,17 +133,17 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if (ViewBag.LibrosMasPrestados != null && ((List<Biblioteca.Models.Libro>)ViewBag.LibrosMasPrestados).Any())
+                    @if (ViewBag.LibrosMasPrestados != null && ((IEnumerable<(Biblioteca.Models.Libro Libro, int TotalPrestamos)>)ViewBag.LibrosMasPrestados).Any())
                     {
                         <div class="list-group list-group-flush">
-                            @foreach (var libro in (List<Biblioteca.Models.Libro>)ViewBag.LibrosMasPrestados)
+                            @foreach (var item in (IEnumerable<(Libro Libro, int TotalPrestamos)>)ViewBag.LibrosMasPrestados)
                             {
-                                <div class="list-group-item d-flex justify-content-between align-items-start border-0">
-                                    <div class="me-auto">
-                                        <div class="fw-bold">@libro.Titulo</div>
-                                        <small class="text-muted">por @libro.Autor?.Nombre</small>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h6 class="mb-0">@item.Libro.Titulo</h6>
+                                        <small class="text-muted">por @item.Libro.Autor?.Nombre</small>
                                     </div>
-                                    <span class="badge bg-primary rounded-pill">@libro.Prestamos?.Count préstamos</span>
+                                    <span class="badge bg-primary">@item.TotalPrestamos préstamos</span>
                                 </div>
                             }
                         </div>
@@ -168,17 +167,17 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    @if (ViewBag.UsuariosMasActivos != null && ((List<Biblioteca.Models.Usuario>)ViewBag.UsuariosMasActivos).Any())
+                    @if (ViewBag.LibrosMasPrestados != null && ((IEnumerable<(Biblioteca.Models.Usuario Usuario, int TotalPrestamos)>)ViewBag.UsuariosMasActivos).Any())
                     {
                         <div class="list-group list-group-flush">
-                            @foreach (var usuario in (List<Biblioteca.Models.Usuario>)ViewBag.UsuariosMasActivos)
+                            @foreach (var item in (IEnumerable<(Usuario Usuario, int TotalPrestamos)>)ViewBag.UsuariosMasActivos)
                             {
-                                <div class="list-group-item d-flex justify-content-between align-items-start border-0">
-                                    <div class="me-auto">
-                                        <div class="fw-bold">@usuario.Nombre</div>
-                                        <small class="text-muted">@usuario.Email</small>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h6 class="mb-0">@item.Usuario.Nombre</h6>
+                                        <small class="text-muted">por @item.Usuario.Email</small>
                                     </div>
-                                    <span class="badge bg-success rounded-pill">@usuario.Prestamos?.Count préstamos</span>
+                                    <span class="badge bg-primary">@item.TotalPrestamos préstamos</span>
                                 </div>
                             }
                         </div>
@@ -469,6 +468,7 @@
     .btn-outline-info:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        color: white;
     }
     
     @@keyframes pulse {

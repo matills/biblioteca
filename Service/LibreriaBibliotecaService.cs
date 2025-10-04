@@ -49,31 +49,31 @@ namespace Biblioteca.Services
             return libro.CantidadDisponible > prestamosActivos;
         }
 
-        public async Task<List<Libro>> GetLibrosMasPrestadosAsync(int cantidad = 10)
+        public async Task<List<(Libro Libro, int TotalPrestamos)>> GetLibrosMasPrestadosAsync(int cantidad = 10)
         {
             return await _context.Libros
                 .Include(l => l.Autor)
                 .Include(l => l.Categoria)
                 .Select(l => new {
                     Libro = l,
-                    TotalPrestamos = l.Prestamos.Count
+                    TotalPrestamos = l.Prestamos.Count()
                 })
                 .OrderByDescending(x => x.TotalPrestamos)
                 .Take(cantidad)
-                .Select(x => x.Libro)
+                .Select(x => new ValueTuple<Libro, int>(x.Libro, x.TotalPrestamos))
                 .ToListAsync();
         }
 
-        public async Task<List<Usuario>> GetUsuariosMasActivosAsync(int cantidad = 10)
+        public async Task<List<(Usuario Usuario, int TotalPrestamos)>> GetUsuariosMasActivosAsync(int cantidad = 10)
         {
             return await _context.Usuarios
                 .Select(u => new {
                     Usuario = u,
-                    TotalPrestamos = u.Prestamos.Count
+                    TotalPrestamos = u.Prestamos.Count()
                 })
                 .OrderByDescending(x => x.TotalPrestamos)
                 .Take(cantidad)
-                .Select(x => x.Usuario)
+                .Select(x => new ValueTuple<Usuario, int>(x.Usuario, x.TotalPrestamos))
                 .ToListAsync();
         }
 
@@ -116,7 +116,7 @@ namespace Biblioteca.Services
             sb.AppendLine("LIBROS MÁS PRESTADOS:");
             for (int i = 0; i < librosMasPrestados.Count; i++)
             {
-                var libro = librosMasPrestados[i];
+                var libro = librosMasPrestados[i].Libro;
                 var totalPrestamos = await _context.Prestamos.CountAsync(p => p.LibroId == libro.LibroId);
                 sb.AppendLine($"{i + 1}. {libro.Titulo} - {libro.Autor?.Nombre} ({totalPrestamos} préstamos)");
             }
@@ -126,7 +126,7 @@ namespace Biblioteca.Services
             sb.AppendLine("USUARIOS MÁS ACTIVOS:");
             for (int i = 0; i < usuariosMasActivos.Count; i++)
             {
-                var usuario = usuariosMasActivos[i];
+                var usuario = usuariosMasActivos[i].Usuario;
                 var totalPrestamos = await _context.Prestamos.CountAsync(p => p.UsuarioId == usuario.UsuarioId);
                 sb.AppendLine($"{i + 1}. {usuario.Nombre} ({totalPrestamos} préstamos)");
             }
@@ -206,7 +206,7 @@ namespace Biblioteca.Services
 
                 for (int i = 0; i < librosMasPrestados.Count; i++)
                 {
-                    var libro = librosMasPrestados[i];
+                    var libro = librosMasPrestados[i].Libro;
                     var totalPrestamos = await _context.Prestamos.CountAsync(p => p.LibroId == libro.LibroId);
                     
                     wsLibros.Cells[i + 2, 1].Value = i + 1;
@@ -227,7 +227,7 @@ namespace Biblioteca.Services
 
                 for (int i = 0; i < usuariosMasActivos.Count; i++)
                 {
-                    var usuario = usuariosMasActivos[i];
+                    var usuario = usuariosMasActivos[i].Usuario;
                     var totalPrestamos = await _context.Prestamos.CountAsync(p => p.UsuarioId == usuario.UsuarioId);
                     
                     wsUsuarios.Cells[i + 2, 1].Value = i + 1;

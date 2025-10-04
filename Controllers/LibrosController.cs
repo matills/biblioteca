@@ -23,6 +23,20 @@ namespace Biblioteca.Controllers
             var libros = await _context.Libros
                 .Include(l => l.Autor)
                 .Include(l => l.Categoria)
+                .Include(l => l.Prestamos)
+                .Select(l => new Libro
+                {
+                    LibroId = l.LibroId,
+                    Titulo = l.Titulo,
+                    ISBN = l.ISBN,
+                    AnoPublicacion = l.AnoPublicacion,
+                    NumeroPaginas = l.NumeroPaginas,
+                    Descripcion = l.Descripcion,
+                    ImagenPortada = l.ImagenPortada,
+                    Autor = l.Autor,
+                    Categoria = l.Categoria,
+                    CantidadDisponible = l.CantidadDisponible - l.Prestamos.Count(p => p.Estado == "Activo" || (p.Estado == "Vencido"))
+                })
                 .ToListAsync();
             
             ViewBag.Categorias = await _context.Categorias.Select(c => c.Nombre).Distinct().ToListAsync();
